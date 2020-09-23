@@ -1,0 +1,72 @@
+version: 2.1
+orbs:
+  node: circleci/node@2.1.1
+
+defaults: &defaults
+  resource_class: small
+  docker:
+    - image: node:12
+
+commands:
+  setup_snyk_user:
+    steps:
+      - run:
+          name: Use snyk-main npmjs user
+          command: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> .npmrc
+
+jobs:
+  test:
+    <<: *defaults
+    steps:
+      - checkout
+      - setup_snyk_user
+      - node/install-packages:
+          override-ci: true
+          cache-key: package.json
+      - run:
+          name: Lint
+          command: npm run lint
+      - run:
+          name: Install JUnit coverage reporter
+          command: npm install --no-save jest-junit
+      - run:
+          name: Run tests with JUnit as reporter
+          command: npx jest --coverage --ci --maxWorkers=3 --reporters=default --reporters=jest-junit
+          environment:
+            JEST_JUNIT_OUTPUT_DIR: ./reports/junit/
+      - store_test_results:
+          path: ./reports/junit/
+      - store_artifacts:
+          path: ./reports/junit
+  release:
+    <<: *defaults
+    steps:
+      - checkout
+      - setup_snyk_user
+      - node/install-packages:
+          override-ci: true
+          cache-key: package.json
+      - run:
+          name: Release on GitHub
+          command: npx semantic-release@16
+
+workflows:
+  version: 2
+  test:
+    jobs:
+      - test:
+          name: Test
+          context: nodejs-install
+          filters:
+            branches:
+              ignore:
+                - master
+  release:
+    jobs:
+      - release:
+          name: Release
+          context: nodejs-lib-release
+          filters:
+            branches:
+              only:
+                - master
