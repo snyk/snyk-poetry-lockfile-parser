@@ -1,15 +1,15 @@
 {
-  "name": "@snyk/CHANGE_ME",
-  "description": "CHANGE_ME",
-  "homepage": "https://github.com/snyk/CHANGE_ME",
+  "name": "snyk-poetry-lockfile-parser",
+  "description": "Generate a dep graph given poetry.lock files",
+  "homepage": "https://github.com/snyk/snyk-poetry-lockfile-parser#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/snyk/CHANGE_ME"
+    "url": "https://github.com/snyk/snyk-poetry-lockfile-parser"
   },
   "author": "snyk.io",
   "license": "Apache-2.0",
   "engines": {
-    "node": ">=10"
+    "node": ">=8"
   },
   "files": [
     "dist"
@@ -29,7 +29,8 @@
     "prepare": "npm run build"
   },
   "dependencies": {
-    "tslib": "^2.0.0"
+    "tslib": "^2.0.0",
+    "toml": "^3.0.0"
   },
   "devDependencies": {
     "@types/jest": "^25.2.3",

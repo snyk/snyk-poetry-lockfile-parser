@@ -1,15 +1,11 @@
 ![Snyk logo](https://snyk.io/style/asset/logo/snyk-print.svg)
 
----
+***
 
-## This is a Template Repository
+[![Known Vulnerabilities](https://snyk.io/test/github/snyk/nodejs-lockfile-parser/badge.svg)](https://snyk.io/test/github/snyk/nodejs-lockfile-parser)
 
-https://help.github.com/en/github/creating-cloning-and-archiving-repositories/creating-a-repository-from-a-template
 
-After creating your repository, search for `CHANGE_ME` and update accordingly
+Snyk helps you find, fix and monitor for known vulnerabilities in your dependencies, both on an ad hoc basis and as part of your CI (Build) system.
 
----
-
-## Title CHANGE_ME
-
-CHANGE_ME
+## Snyk Poetry Lockfile Parser
+Given a pyproject.toml and poetry.lock files builds a dep graph
