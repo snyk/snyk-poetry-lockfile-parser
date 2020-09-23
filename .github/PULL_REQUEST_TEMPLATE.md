@@ -1,12 +1,12 @@
-- [ ] Tests written and linted [ℹ︎](https://github.com/snyk/general/wiki/Tests)
-- [ ] Documentation written [ℹ︎](https://github.com/snyk/general/wiki/Documentation)
-- [ ] Commit history is tidy [ℹ︎](https://github.com/snyk/general/wiki/Git)
+- [ ] Tests written and linted
+- [ ] Documentation written / README.md updated [https://snyk.io/docs/snyk-for-node/](i)
+- [ ] Follows [CONTRIBUTING agreement](CONTRIBUTING.md)
+- [ ] Commit history is tidy [https://git-scm.com/book/en/v2/Git-Branching-Rebasing](i)
+- [ ] Reviewed by Snyk team
 
 ### What this does
 
 _Explain why this PR exists_
-
-(Please ensure crucial information is also included in the git commit messages)
 
 ### Notes for the reviewer
 
@@ -14,7 +14,8 @@ _Instructions on how to run this locally, background context, what to review, qu
 
 ### More information
 
-- [Jira ticket SC-0000](https://snyksec.atlassian.net/browse/SC-0000)
+- [SC-XXXX]()
+- [Link to documentation]()
 
 ### Screenshots
 
