@@ -29,6 +29,7 @@
     "prepare": "npm run build"
   },
   "dependencies": {
+    "@snyk/dep-graph": "1.19.4",
     "tslib": "^2.0.0",
     "toml": "^3.0.0"
   },
