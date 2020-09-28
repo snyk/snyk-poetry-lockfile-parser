@@ -81,8 +81,17 @@ export function buildDepGraph(
   console.log('lockFile: ', lockFile);
 
   const pkgManager: PkgManager = { name: 'poetry' };
-  const rootPkg: PkgInfo = { name: 'pkg' };
-  const builder = new DepGraphBuilder(pkgManager, rootPkg);
+  const builder = new DepGraphBuilder(pkgManager);
+
+  const poetryDependencies = manifestFile.tool.poetry.dependencies;
+  Object.keys(poetryDependencies).forEach((packageName: string) => {
+    const pkg = lockFile.package.find((lockItem) => {
+      return lockItem.name == packageName;
+    });
+    const pkgInfo = { name: packageName, version: pkg!.version }
+    builder.addPkgNode(pkgInfo, packageName);
+    builder.connectDep(builder.rootNodeId, packageName);
+  });
 
   return builder.build();
 }
