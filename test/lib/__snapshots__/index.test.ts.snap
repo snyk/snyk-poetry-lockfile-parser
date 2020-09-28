@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildDepGraph buildDepGraph for "empty" folder 1`] = `
+Array [
+  Object {
+    "name": "pkg",
+  },
+]
+`;
+
+exports[`buildDepGraph buildDepGraph for "official" folder 1`] = `
+Array [
+  Object {
+    "name": "pkg",
+  },
+]
+`;
+
+exports[`buildDepGraph buildDepGraph for "one-dependency" folder 1`] = `
+Array [
+  Object {
+    "name": "pkg",
+  },
+]
+`;

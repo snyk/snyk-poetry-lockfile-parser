@@ -1,5 +1,6 @@
 {
   "name": "snyk-poetry-lockfile-parser",
+  "version": "1.0.0",
   "description": "Generate a dep graph given poetry.lock files",
   "homepage": "https://github.com/snyk/snyk-poetry-lockfile-parser#readme",
   "repository": {
@@ -29,9 +30,12 @@
     "prepare": "npm run build"
   },
   "dependencies": {
+    "@snyk/cli-interface": "^2.9.2",
     "@snyk/dep-graph": "1.19.4",
-    "tslib": "^2.0.0",
-    "toml": "^3.0.0"
+    "@types/debug": "^4.1.5",
+    "debug": "^4.2.0",
+    "toml": "^3.0.0",
+    "tslib": "^2.0.0"
   },
   "devDependencies": {
     "@types/jest": "^25.2.3",
