@@ -78,9 +78,9 @@ export function buildDepGraph(
   const manifestFile: PoetryManifestType = toml.parse(manifestFileContents);
   const lockFile: PoetryLockFile = toml.parse(lockFileContents);
   console.log('manifestFile: ', manifestFile);
-  console.log(lockFile, manifestFile, includeDev);
+  console.log('lockFile: ', lockFile);
 
-  const pkgManager: PkgManager = { name: 'name' };
+  const pkgManager: PkgManager = { name: 'poetry' };
   const rootPkg: PkgInfo = { name: 'pkg' };
   const builder = new DepGraphBuilder(pkgManager, rootPkg);
 
