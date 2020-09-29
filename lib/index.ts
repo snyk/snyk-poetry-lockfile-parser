@@ -51,15 +51,11 @@ export function getDependencyNamesFrom(manifestFileContents: string): string[] {
   return poetryDependencies;
 }
 
-export function getDependencyNamesFromLockFile(record: Record<string, Dependency> | undefined): string[] {
-  if (!record) {
-    return [];
-  }
-  return Object.keys(record);
-}
-
 export function getDependenciesFrom(lockFileContents: string): LockFileDependency[] {
   const lockFile: PoetryLockFile = toml.parse(lockFileContents);
+  if (!lockFile?.package) {
+    return [];
+  }
   return lockFile.package.map((pkg) => {
     return {
       name: pkg.name,
@@ -67,6 +63,13 @@ export function getDependenciesFrom(lockFileContents: string): LockFileDependenc
       dependencies: getDependencyNamesFromLockFile(pkg.dependencies)
     }
   });
+}
+
+function getDependencyNamesFromLockFile(record: Record<string, Dependency> | undefined): string[] {
+  if (!record) {
+    return [];
+  }
+  return Object.keys(record);
 }
 
 export interface LockFileDependency {
