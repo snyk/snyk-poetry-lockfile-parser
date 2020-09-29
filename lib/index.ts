@@ -11,20 +11,15 @@ export function buildDepGraph(
     throw new Error('lockFileContents is missing');
   }
 
-  const manifestFile: PoetryManifestType = toml.parse(manifestFileContents);
+  const poetryDependencies = getDependenciesFrom(manifestFileContents);
   const lockFile: PoetryLockFile = toml.parse(lockFileContents);
 
   const pkgManager: PkgManager = { name: 'poetry' };
-
   const builder = new DepGraphBuilder(pkgManager);
 
-  const poetryDependencies = manifestFile.tool.poetry.dependencies;
-
-  Object.keys(poetryDependencies)
-    .filter(pkgName => pkgName != 'python')
-    .forEach(pkgName => {
-      addDependenciesFor(pkgName, builder.rootNodeId);
-    });
+  poetryDependencies.forEach(pkgName => {
+    addDependenciesFor(pkgName, builder.rootNodeId);
+  });
 
   return builder.build();
 
@@ -45,4 +40,14 @@ export function buildDepGraph(
         })
     }
   }
+}
+
+export function getDependenciesFrom(manifestFileContents: string): string[] {
+  const manifestFile: PoetryManifestType = toml.parse(manifestFileContents);
+  if (!manifestFile?.tool?.poetry?.dependencies) {
+    return [];
+  }
+  const poetryDependencies = Object.keys(manifestFile.tool.poetry.dependencies)
+    .filter(pkgName => pkgName != 'python');
+  return poetryDependencies;
 }

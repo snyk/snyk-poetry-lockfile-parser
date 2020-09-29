@@ -2,7 +2,6 @@ import { readFixture } from './utils';
 import { buildDepGraph } from '../../lib';
 import { DepGraphBuilder } from '@snyk/dep-graph';
 
-
 describe('buildDepGraph', () => {
   let depGraphBuilder: DepGraphBuilder;
 
