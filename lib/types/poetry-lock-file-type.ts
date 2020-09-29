@@ -3,6 +3,12 @@ export interface PoetryLockFile {
   metadata: Metadata;
 }
 
+export type Dependency = SpecificVersion | {
+  markers: string;
+  optional?: boolean;
+  version: RangeVersion;
+}
+
 interface Package {
   category: 'dev' | 'main';
   description?: string;
@@ -16,12 +22,6 @@ interface Package {
 
 type SpecificVersion = string; // i.e. "1.0.2"
 type RangeVersion = string; // i.e. "^1.3", ">2", etc
-
-type Dependency = SpecificVersion | {
-  markers: string;
-  optional?: boolean;
-  version: RangeVersion;
-}
 
 interface Metadata {
   'content-hash': string;
