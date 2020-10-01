@@ -1,4 +1,6 @@
-import { getDependenciesFrom, getDependencyNamesFrom } from '../../../lib';
+import { getDependencyInfoFrom, getDependencyNamesFrom } from '../../../lib';
+
+
 
 describe('loading manifest files', () => {
   it('should parse file and return list of poetry dependency names', () => {
@@ -43,14 +45,14 @@ describe('loading lockfile', () => {
       name = "pkg_b"
       optional = false
       version = "1.1.1"`
-    const lockFileDependencies = getDependenciesFrom(fileContents);
+    const lockFileDependencies = getDependencyInfoFrom(fileContents);
     expect(lockFileDependencies.length).toBe(2);
     expect(lockFileDependencies).toContainEqual({name: "pkg_a", version: "2.11.2", dependencies: ["pkg_b"] });
     expect(lockFileDependencies).toContainEqual({name: "pkg_b", version: "1.1.1", dependencies: []});
   });
 
   it('should return an empty list when no packages are specified in file', () => {
-    const lockFileDependencies = getDependenciesFrom('');
+    const lockFileDependencies = getDependencyInfoFrom('');
     expect(lockFileDependencies.length).toBe(0);
   });
 });

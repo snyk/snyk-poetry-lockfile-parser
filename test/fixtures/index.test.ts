@@ -27,9 +27,7 @@ describe('buildDepGraph', () => {
 
     expect(depGraphForScenarioAt('scenarios/one-dep-no-transitives')
       .equals(expectedGraph)).toBe(true);
-
   });
-
 })
 
 function depGraphForScenarioAt(scenarioPath: string) {
