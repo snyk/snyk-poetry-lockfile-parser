@@ -37,8 +37,7 @@ type PythonRangeVersion = string; // i.e. "~2.7"
 type Dependency = RangeVersion | DependencyObject | DependencyObject[];
 
 interface DependencyObject {
-  version: RangeVersion,
-  python?: PythonRangeVersion,
-  extras?: any
+  version: RangeVersion;
+  python?: PythonRangeVersion;
+  extras?: any;
 }
-

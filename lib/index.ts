@@ -1,5 +1,8 @@
 import * as toml from 'toml';
-import { Dependency, PoetryLockFile } from './types/poetry-lock-file-type';
+import {
+  PoetryLockFileDependency,
+  PoetryLockFile,
+} from './types/poetry-lock-file-type';
 import { DepGraph, DepGraphBuilder } from '@snyk/dep-graph';
 import { PoetryManifestType } from './types/poetry-manifest-type';
 
@@ -7,8 +10,11 @@ export function buildDepGraph(
   manifestFileContents: string,
   lockFileContents: string,
 ): DepGraph {
+  if (!manifestFileContents?.trim()) {
+    throw new Error('The pyproject.toml is empty');
+  }
   if (!lockFileContents?.trim()) {
-    throw new Error('lockFileContents is missing');
+    throw new Error('The poetry.lock is empty');
   }
 
   const dependencyNames = getDependencyNamesFrom(manifestFileContents);
@@ -18,35 +24,52 @@ export function buildDepGraph(
   addDependenciesToGraph(dependencyNames, builder.rootNodeId, builder);
   return builder.build();
 
-  function addDependenciesToGraph(pkgNames: string[], parentClientId: string, builder: DepGraphBuilder) {
-    pkgNames.forEach(pkgName => {
+  function addDependenciesToGraph(
+    pkgNames: string[],
+    parentClientId: string,
+    builder: DepGraphBuilder,
+  ) {
+    pkgNames.forEach((pkgName) => {
       addDependenciesFor(pkgName, parentClientId, builder);
     });
   }
 
-  function pkgInfoFor(packageName: string) {
+  function addDependenciesFor(
+    packageName: string,
+    parentNodeId: string,
+    builder: DepGraphBuilder,
+  ) {
+    const pkg = pkgLockInfoFor(packageName);
+    if (!pkg) {
+      throw new Error(
+        `Unable to find dependencies in poetry.lock for package: ${packageName}`,
+      );
+    }
+    const pkgInfo = { name: packageName, version: pkg.version };
+    builder
+      .addPkgNode(pkgInfo, packageName)
+      .connectDep(parentNodeId, packageName);
+    addDependenciesToGraph(pkg.dependencies, packageName, builder);
+  }
+
+  function pkgLockInfoFor(packageName: string) {
     return dependencyInfos.find((lockItem) => {
       return lockItem.name.toLowerCase() === packageName.toLowerCase();
     });
-  }
-
-  function addDependenciesFor(packageName: string, parentNodeId: string, builder: DepGraphBuilder) {
-    const pkg = pkgInfoFor(packageName);
-    const pkgInfo = { name: packageName, version: pkg!.version };
-    builder.addPkgNode(pkgInfo, packageName).connectDep(parentNodeId, packageName);
-    if (pkg) {
-      addDependenciesToGraph(pkg.dependencies, packageName, builder)
-    }
   }
 }
 
 export function getDependencyNamesFrom(manifestFileContents: string): string[] {
   const manifestFile: PoetryManifestType = toml.parse(manifestFileContents);
-  return Object.keys(manifestFile.tool?.poetry?.dependencies || [])
-    .filter(pkgName => pkgName != 'python');
+  return Object.keys(manifestFile.tool?.poetry?.dependencies || []).filter(
+    // TODO: Do we want to ignore python or can this be removed?
+    (pkgName) => pkgName != 'python',
+  );
 }
 
-export function getDependencyInfoFrom(lockFileContents: string): LockFileDependency[] {
+export function getDependencyInfoFrom(
+  lockFileContents: string,
+): PoetryLockFileDependency[] {
   const lockFile: PoetryLockFile = toml.parse(lockFileContents);
   if (!lockFile?.package) {
     return [];
@@ -55,20 +78,7 @@ export function getDependencyInfoFrom(lockFileContents: string): LockFileDepende
     return {
       name: pkg.name,
       version: pkg.version,
-      dependencies: getDependencyNamesFromLockFile(pkg.dependencies)
-    }
+      dependencies: Object.keys(pkg.dependencies || []),
+    };
   });
-}
-
-function getDependencyNamesFromLockFile(record: Record<string, Dependency> | undefined): string[] {
-  if (!record) {
-    return [];
-  }
-  return Object.keys(record);
-}
-
-export interface LockFileDependency {
-  name: string,
-  version: string,
-  dependencies: string[]
 }
