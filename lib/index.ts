@@ -9,6 +9,7 @@ import { PoetryManifestType } from './types/poetry-manifest-type';
 export function buildDepGraph(
   manifestFileContents: string,
   lockFileContents: string,
+  includeDevDependencies = false,
 ): DepGraph {
   if (!manifestFileContents?.trim()) {
     throw new Error('The pyproject.toml is empty');
@@ -17,7 +18,10 @@ export function buildDepGraph(
     throw new Error('The poetry.lock is empty');
   }
 
-  const dependencyNames = getDependencyNamesFrom(manifestFileContents);
+  const dependencyNames = getDependencyNamesFrom(
+    manifestFileContents,
+    includeDevDependencies,
+  );
   const dependencyInfos = getDependencyInfoFrom(lockFileContents);
 
   const builder = new DepGraphBuilder({ name: 'poetry' });
@@ -59,10 +63,22 @@ export function buildDepGraph(
   }
 }
 
-export function getDependencyNamesFrom(manifestFileContents: string): string[] {
+export function getDependencyNamesFrom(
+  manifestFileContents: string,
+  includeDevDependencies: boolean,
+): string[] {
   const manifestFile: PoetryManifestType = toml.parse(manifestFileContents);
-  return Object.keys(manifestFile.tool?.poetry?.dependencies || []).filter(
-    // TODO: Do we want to ignore python or can this be removed?
+  const dependencies = Object.keys(
+    manifestFile.tool?.poetry?.dependencies || [],
+  );
+  let devDependencies: string[] = [];
+  if (includeDevDependencies) {
+    devDependencies = Object.keys(
+      manifestFile.tool?.poetry?.['dev-dependencies'] || [],
+    );
+  }
+  // TODO: Do we want to ignore python or can this be removed?
+  return [...dependencies, ...devDependencies].filter(
     (pkgName) => pkgName != 'python',
   );
 }

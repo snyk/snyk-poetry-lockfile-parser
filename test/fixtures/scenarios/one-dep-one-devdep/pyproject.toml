@@ -5,8 +5,10 @@ description = ""
 authors = []
 
 [tool.poetry.dependencies]
-python = "~2.7 || ^3.5"
-jinja2 = "^2.11"
+six = "^1.14"
+
+[tool.poetry.dev-dependencies]
+isOdd = "0.1.2"
 
 [build-system]
 requires = ["poetry>=0.12"]

@@ -63,7 +63,7 @@ describe('loading manifest files', () => {
     const fileContents = `[tool.poetry.dependencies]
       pkg_a = "^2.11"
       pkg_b = "^1.0"`;
-    const poetryDependencies = getDependencyNamesFrom(fileContents);
+    const poetryDependencies = getDependencyNamesFrom(fileContents, false);
     expect(poetryDependencies.length).toBe(2);
     expect(poetryDependencies.includes('pkg_a')).toBe(true);
     expect(poetryDependencies.includes('pkg_b')).toBe(true);
@@ -73,14 +73,36 @@ describe('loading manifest files', () => {
     const fileContents = `[tool.poetry.dependencies]
       pkg_a = "^2.11"
       python = "~2.7 || ^3.5"`;
-    const poetryDependencies = getDependencyNamesFrom(fileContents);
+    const poetryDependencies = getDependencyNamesFrom(fileContents, false);
     expect(poetryDependencies.length).toBe(1);
     expect(poetryDependencies.includes('pkg_a')).toBe(true);
     expect(poetryDependencies.includes('python')).toBe(false);
   });
 
+  it('should include devDependencies when asked to', () => {
+    const fileContents = `[tool.poetry.dependencies]
+      pkg_a = "^2.11"
+      [tool.poetry.dev-dependencies]
+      pkg_b = "^1.0"`;
+    const poetryDependencies = getDependencyNamesFrom(fileContents, true);
+    expect(poetryDependencies.length).toBe(2);
+    expect(poetryDependencies.includes('pkg_a')).toBe(true);
+    expect(poetryDependencies.includes('pkg_b')).toBe(true);
+  });
+
+  it('should not include devDependencies when not asked to', () => {
+    const fileContents = `[tool.poetry.dependencies]
+      pkg_a = "^2.11"
+      [tool.poetry.dev-dependencies]
+      pkg_b = "^1.0"`;
+    const poetryDependencies = getDependencyNamesFrom(fileContents, false);
+    expect(poetryDependencies.length).toBe(1);
+    expect(poetryDependencies.includes('pkg_a')).toBe(true);
+    expect(poetryDependencies.includes('pkg_b')).toBe(false);
+  });
+
   it('should not return any dependencies for an empty file', () => {
-    const poetryDependencies = getDependencyNamesFrom('');
+    const poetryDependencies = getDependencyNamesFrom('', true);
     expect(poetryDependencies.length).toBe(0);
   });
 });
