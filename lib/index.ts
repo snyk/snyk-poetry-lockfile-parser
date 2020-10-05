@@ -1,100 +1,66 @@
-import * as toml from 'toml';
-import {
-  PoetryLockFileDependency,
-  PoetryLockFile,
-} from './types/poetry-lock-file-type';
 import { DepGraph, DepGraphBuilder } from '@snyk/dep-graph';
-import { PoetryManifestType } from './types/poetry-manifest-type';
+import * as manifest from './manifest-parser';
+import * as lockFile from './lock-file-parser';
+import { PoetryLockFilePackageSpecification } from '../dist/types/poetry-lock-file-type';
 
 export function buildDepGraph(
   manifestFileContents: string,
   lockFileContents: string,
   includeDevDependencies = false,
 ): DepGraph {
-  if (!manifestFileContents?.trim()) {
-    throw new Error('The pyproject.toml is empty');
-  }
-  if (!lockFileContents?.trim()) {
-    throw new Error('The poetry.lock is empty');
-  }
 
-  const dependencyNames = getDependencyNamesFrom(
+  const dependencyNames = manifest.getDependencyNamesFrom(
     manifestFileContents,
     includeDevDependencies,
   );
-  const dependencyInfos = getDependencyInfoFrom(lockFileContents);
+
+  const pkgSpecs = lockFile.packageSpecsFrom(lockFileContents);
 
   const builder = new DepGraphBuilder({ name: 'poetry' });
-  addDependenciesToGraph(dependencyNames, builder.rootNodeId, builder);
+  addDependenciesToGraph(dependencyNames, pkgSpecs, builder.rootNodeId, builder);
   return builder.build();
+}
 
-  function addDependenciesToGraph(
-    pkgNames: string[],
-    parentClientId: string,
-    builder: DepGraphBuilder,
-  ) {
-    for (const pkgName of pkgNames) {
-      addDependenciesFor(pkgName, parentClientId, builder);
-    }
-  }
-
-  function addDependenciesFor(
-    packageName: string,
-    parentNodeId: string,
-    builder: DepGraphBuilder,
-  ) {
-    const pkg = pkgLockInfoFor(packageName);
-    if (!pkg) {
-      throw new Error(
-        `Unable to find dependencies in poetry.lock for package: ${packageName}`,
-      );
-    }
-    const pkgInfo = { name: packageName, version: pkg.version };
-    builder
-      .addPkgNode(pkgInfo, packageName)
-      .connectDep(parentNodeId, packageName);
-    addDependenciesToGraph(pkg.dependencies, packageName, builder);
-  }
-
-  function pkgLockInfoFor(packageName: string) {
-    return dependencyInfos.find((lockItem) => {
-      return lockItem.name.toLowerCase() === packageName.toLowerCase();
-    });
+function addDependenciesToGraph(
+  pkgNames: string[],
+  pkgSpecs: PoetryLockFilePackageSpecification[],
+  parentClientId: string,
+  builder: DepGraphBuilder,
+) {
+  for (const pkgName of pkgNames) {
+    addDependenciesFor(pkgName, pkgSpecs, parentClientId, builder);
   }
 }
 
-export function getDependencyNamesFrom(
-  manifestFileContents: string,
-  includeDevDependencies: boolean,
-): string[] {
-  const manifestFile: PoetryManifestType = toml.parse(manifestFileContents);
-  const dependencies = Object.keys(
-    manifestFile.tool?.poetry?.dependencies || [],
-  );
-  let devDependencies: string[] = [];
-  if (includeDevDependencies) {
-    devDependencies = Object.keys(
-      manifestFile.tool?.poetry?.['dev-dependencies'] || [],
-    );
+function addDependenciesFor(
+  packageName: string,
+  pkgSpecs: PoetryLockFilePackageSpecification[],
+  parentNodeId: string,
+  builder: DepGraphBuilder,
+) {
+  const pkg = pkgLockInfoFor(packageName, pkgSpecs);
+  if (!pkg) {
+    throw new DependencyNotFound(packageName);
   }
-  // TODO: Do we want to ignore python or can this be removed?
-  return [...dependencies, ...devDependencies].filter(
-    (pkgName) => pkgName != 'python',
-  );
+  const pkgInfo = { name: packageName, version: pkg.version };
+  builder
+    .addPkgNode(pkgInfo, packageName)
+    .connectDep(parentNodeId, packageName);
+  addDependenciesToGraph(pkg.dependencies, pkgSpecs, packageName, builder);
 }
 
-export function getDependencyInfoFrom(
-  lockFileContents: string,
-): PoetryLockFileDependency[] {
-  const lockFile: PoetryLockFile = toml.parse(lockFileContents);
-  if (!lockFile?.package) {
-    return [];
-  }
-  return lockFile.package.map((pkg) => {
-    return {
-      name: pkg.name,
-      version: pkg.version,
-      dependencies: Object.keys(pkg.dependencies || []),
-    };
+function pkgLockInfoFor(packageName: string, pkgSpecs: PoetryLockFilePackageSpecification[]) {
+  return pkgSpecs.find((lockItem) => {
+    return lockItem.name.toLowerCase() === packageName.toLowerCase();
   });
 }
+
+class DependencyNotFound extends Error {
+  constructor(pkgName: string) {
+    super(`Unable to find dependencies in poetry.lock for package: ${pkgName}`)
+    this.name="DependencyNotFound"
+  }
+}
+
+export type PoetryParsingError =
+  manifest.ManifestFileNotValid | lockFile.LockFileNotValid | DependencyNotFound;
