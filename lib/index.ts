@@ -33,9 +33,9 @@ export function buildDepGraph(
     parentClientId: string,
     builder: DepGraphBuilder,
   ) {
-    pkgNames.forEach((pkgName) => {
+    for (const pkgName of pkgNames) {
       addDependenciesFor(pkgName, parentClientId, builder);
-    });
+    }
   }
 
   function addDependenciesFor(
