@@ -1,7 +1,7 @@
 # Contributing
 
 ## Contributor Agreement
-A pull-request will only be considered for merging into the upstream codebase after you have signed our [contributor agreement](https://github.com/snyk/nodejs-lockfile-parser/master/Contributor-Agreement.md), assigning us the rights to the contributed code and granting you a license to use it in return. If you submit a pull request, you will be prompted to review and sign the agreement with one click (we use [CLA assistant](https://cla-assistant.io/)).
+A pull-request will only be considered for merging into the upstream codebase after you have signed our [contributor agreement](https://github.com/snyk/snyk/dep-graph/master/Contributor-Agreement.md), assigning us the rights to the contributed code and granting you a license to use it in return. If you submit a pull request, you will be prompted to review and sign the agreement with one click (we use [CLA assistant](https://cla-assistant.io/)).
 
 ## Commit messages
 
@@ -34,7 +34,7 @@ To release a major you need to add `BREAKING CHANGE: ` to the start of the body 
 
 ## Code standards
 
-Ensure that your code adheres to the included `.eslintrc.json` config by running `npm run lint`.
+Ensure that your code adheres to the included `.eslintrc` config by running `npm run lint`.
 
 ## Sending pull requests
 
