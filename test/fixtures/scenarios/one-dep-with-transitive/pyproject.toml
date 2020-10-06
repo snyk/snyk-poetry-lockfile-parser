@@ -1,14 +1,12 @@
 [tool.poetry]
-name = "one-dependency"
+name = "poetry-fixtures-project"
 version = "0.1.0"
 description = ""
-authors = ["Admon Sasson <admon.sasson@snyk.io>"]
+authors = []
 
 [tool.poetry.dependencies]
-python = "^3.8"
-hello-world = "0.2"
-
-[tool.poetry.dev-dependencies]
+python = "~2.7 || ^3.5"
+jinja2 = "^2.11"
 
 [build-system]
 requires = ["poetry>=0.12"]
