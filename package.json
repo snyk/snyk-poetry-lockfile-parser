@@ -1,7 +1,6 @@
 {
   "name": "snyk-poetry-lockfile-parser",
-  "version": "1.0.0",
-  "description": "Generate a dep graph given poetry.lock files",
+  "description": "Generate a dep graph given poetry.lock and pyproject.toml files",
   "homepage": "https://github.com/snyk/snyk-poetry-lockfile-parser#readme",
   "repository": {
     "type": "git",
