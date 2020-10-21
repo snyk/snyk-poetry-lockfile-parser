@@ -1,13 +1,17 @@
-import { getDependencyNamesFrom, ManifestFileNotValid } from '../../../lib/manifest-parser';
+import {
+  getDependencyNamesFrom,
+  ManifestFileNotValid,
+} from '../../../lib/manifest-parser';
 
 describe('when loading manifest files', () => {
   it('should throw exception if tools.poetry stanza not found', () => {
-    expect(() => getDependencyNamesFrom('', false)).toThrow(ManifestFileNotValid)
-  })
+    expect(() => getDependencyNamesFrom('', false)).toThrow(
+      ManifestFileNotValid,
+    );
+  });
 
   it('should return list of dependency package names', () => {
-    const fileContents =
-      `[tool.poetry.dependencies]
+    const fileContents = `[tool.poetry.dependencies]
       pkg_a = "^2.11"
       pkg_b = "^1.0"`;
     const poetryDependencies = getDependencyNamesFrom(fileContents, false);
@@ -17,8 +21,7 @@ describe('when loading manifest files', () => {
   });
 
   it('should not return python if listed as a dependency', () => {
-    const fileContents =
-      `[tool.poetry.dependencies]
+    const fileContents = `[tool.poetry.dependencies]
       pkg_a = "^2.11"
       python = "~2.7 || ^3.5"`;
     const poetryDependencies = getDependencyNamesFrom(fileContents, false);
@@ -28,8 +31,7 @@ describe('when loading manifest files', () => {
   });
 
   it('should include devDependencies when asked to', () => {
-    const fileContents =
-      `[tool.poetry.dependencies]
+    const fileContents = `[tool.poetry.dependencies]
       pkg_a = "^2.11"
       [tool.poetry.dev-dependencies]
       pkg_b = "^1.0"`;
@@ -54,4 +56,4 @@ describe('when loading manifest files', () => {
     const poetryDependencies = getDependencyNamesFrom('[tool.poetry]', false);
     expect(poetryDependencies.length).toBe(0);
   });
-})
+});
