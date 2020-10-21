@@ -1,9 +1,12 @@
-import { packageSpecsFrom, LockFileNotValid } from '../../../lib/lock-file-parser';
+import {
+  packageSpecsFrom,
+  LockFileNotValid,
+} from '../../../lib/lock-file-parser';
 
 describe('when loading lockfile', () => {
   it('should throw exception if package stanza not found', () => {
-    expect(() => packageSpecsFrom('')).toThrow(LockFileNotValid)
-  })
+    expect(() => packageSpecsFrom('')).toThrow(LockFileNotValid);
+  });
 
   it('should parse a lockfile and return a list of its packages and their dependency names', () => {
     const fileContents = `[[package]]
@@ -38,4 +41,4 @@ describe('when loading lockfile', () => {
     const lockFileDependencies = packageSpecsFrom('package = []');
     expect(lockFileDependencies.length).toBe(0);
   });
-})
+});

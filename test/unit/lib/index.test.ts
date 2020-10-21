@@ -1,4 +1,4 @@
-import {buildDepGraph} from '../../../lib';
+import { buildDepGraph } from '../../../lib';
 
 describe('buildDepGraph', () => {
   describe('fileContents', () => {
@@ -53,5 +53,3 @@ describe('buildDepGraph', () => {
     );
   });
 });
-
-;

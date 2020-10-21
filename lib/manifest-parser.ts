@@ -4,15 +4,15 @@ export function getDependencyNamesFrom(
   manifestFileContents: string,
   includeDevDependencies: boolean,
 ): string[] {
-
   const manifest: PoetryManifestType = toml.parse(manifestFileContents);
   if (!manifest.tool?.poetry) {
-    throw new ManifestFileNotValid()
+    throw new ManifestFileNotValid();
   }
 
   const dependencies = dependenciesFrom(manifest);
-  const devDependencies: string[] = includeDevDependencies ?
-    devDependenciesFrom(manifest) : [];
+  const devDependencies: string[] = includeDevDependencies
+    ? devDependenciesFrom(manifest)
+    : [];
 
   return [...dependencies, ...devDependencies].filter(
     (pkgName) => pkgName != 'python',
@@ -29,8 +29,8 @@ function dependenciesFrom(manifest: PoetryManifestType) {
 
 export class ManifestFileNotValid extends Error {
   constructor() {
-    super('pyproject.toml is not a valid poetry file.')
-    this.name = "ManifestFileNotValid"
+    super('pyproject.toml is not a valid poetry file.');
+    this.name = 'ManifestFileNotValid';
   }
 }
 

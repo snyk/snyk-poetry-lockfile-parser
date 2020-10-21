@@ -1,14 +1,13 @@
 import { DepGraph, DepGraphBuilder } from '@snyk/dep-graph';
 import * as manifest from './manifest-parser';
 import * as lockFile from './lock-file-parser';
-import { PoetryLockFilePackageSpecification } from '../dist/types/poetry-lock-file-type';
+import { PoetryLockFileDependency } from './lock-file-parser';
 
 export function buildDepGraph(
   manifestFileContents: string,
   lockFileContents: string,
   includeDevDependencies = false,
 ): DepGraph {
-
   const dependencyNames = manifest.getDependencyNamesFrom(
     manifestFileContents,
     includeDevDependencies,
@@ -17,13 +16,18 @@ export function buildDepGraph(
   const pkgSpecs = lockFile.packageSpecsFrom(lockFileContents);
 
   const builder = new DepGraphBuilder({ name: 'poetry' });
-  addDependenciesToGraph(dependencyNames, pkgSpecs, builder.rootNodeId, builder);
+  addDependenciesToGraph(
+    dependencyNames,
+    pkgSpecs,
+    builder.rootNodeId,
+    builder,
+  );
   return builder.build();
 }
 
 function addDependenciesToGraph(
   pkgNames: string[],
-  pkgSpecs: PoetryLockFilePackageSpecification[],
+  pkgSpecs: PoetryLockFileDependency[],
   parentClientId: string,
   builder: DepGraphBuilder,
 ) {
@@ -34,7 +38,7 @@ function addDependenciesToGraph(
 
 function addDependenciesFor(
   packageName: string,
-  pkgSpecs: PoetryLockFilePackageSpecification[],
+  pkgSpecs: PoetryLockFileDependency[],
   parentNodeId: string,
   builder: DepGraphBuilder,
 ) {
@@ -49,7 +53,10 @@ function addDependenciesFor(
   addDependenciesToGraph(pkg.dependencies, pkgSpecs, packageName, builder);
 }
 
-function pkgLockInfoFor(packageName: string, pkgSpecs: PoetryLockFilePackageSpecification[]) {
+function pkgLockInfoFor(
+  packageName: string,
+  pkgSpecs: PoetryLockFileDependency[],
+) {
   return pkgSpecs.find((lockItem) => {
     return lockItem.name.toLowerCase() === packageName.toLowerCase();
   });
@@ -57,10 +64,12 @@ function pkgLockInfoFor(packageName: string, pkgSpecs: PoetryLockFilePackageSpec
 
 class DependencyNotFound extends Error {
   constructor(pkgName: string) {
-    super(`Unable to find dependencies in poetry.lock for package: ${pkgName}`)
-    this.name="DependencyNotFound"
+    super(`Unable to find dependencies in poetry.lock for package: ${pkgName}`);
+    this.name = 'DependencyNotFound';
   }
 }
 
 export type PoetryParsingError =
-  manifest.ManifestFileNotValid | lockFile.LockFileNotValid | DependencyNotFound;
+  | manifest.ManifestFileNotValid
+  | lockFile.LockFileNotValid
+  | DependencyNotFound;

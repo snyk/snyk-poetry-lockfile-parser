@@ -3,12 +3,10 @@ import * as toml from 'toml';
 export function packageSpecsFrom(
   lockFileContents: string,
 ): PoetryLockFileDependency[] {
-
   const lockFile: PoetryLockFile = toml.parse(lockFileContents);
   if (!lockFile.package) {
     throw new LockFileNotValid();
   }
-
 
   return lockFile.package.map((pkg) => {
     return {
@@ -29,7 +27,7 @@ interface Package {
   dependencies?: Record<string, PoetryLockFileDependency>;
 }
 
-interface PoetryLockFileDependency {
+export interface PoetryLockFileDependency {
   name: string;
   version: string;
   dependencies: string[];
@@ -37,7 +35,7 @@ interface PoetryLockFileDependency {
 
 export class LockFileNotValid extends Error {
   constructor() {
-    super("The poetry.lock file contains no package stanza'")
+    super("The poetry.lock file contains no package stanza'");
     this.name = 'LockFileNotValid';
   }
 }
