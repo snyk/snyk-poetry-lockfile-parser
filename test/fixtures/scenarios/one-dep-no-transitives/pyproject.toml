@@ -1,6 +1,6 @@
 [tool.poetry]
-name = "poetry-fixtures-project"
-version = "0.1.0"
+name = "myPkg"
+version = "1.42.2"
 description = ""
 authors = []
 

@@ -12,10 +12,11 @@ export function buildDepGraph(
     manifestFileContents,
     includeDevDependencies,
   );
+  const packageDetails = manifest.pkgInfoFrom(manifestFileContents);
 
   const pkgSpecs = lockFile.packageSpecsFrom(lockFileContents);
 
-  const builder = new DepGraphBuilder({ name: 'poetry' });
+  const builder = new DepGraphBuilder({ name: 'poetry' }, packageDetails);
   addDependenciesToGraph(
     dependencyNames,
     pkgSpecs,

@@ -1,9 +1,20 @@
 import {
   getDependencyNamesFrom,
   ManifestFileNotValid,
+  pkgInfoFrom,
 } from '../../../lib/manifest-parser';
 
 describe('when loading manifest files', () => {
+  it('should return package info given the contents of a manifest', () => {
+    const fileContents = `[tool.poetry]
+        name = "poetry-fixtures-project"
+        version = "0.1.0"`;
+
+    const { name, version } = pkgInfoFrom(fileContents);
+    expect(name).toBe('poetry-fixtures-project');
+    expect(version).toBe('0.1.0');
+  });
+
   it('should throw exception if tools.poetry stanza not found', () => {
     expect(() => getDependencyNamesFrom('', false)).toThrow(
       ManifestFileNotValid,
