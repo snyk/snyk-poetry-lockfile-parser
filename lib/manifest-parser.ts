@@ -1,5 +1,16 @@
 import * as toml from 'toml';
 
+export function pkgInfoFrom(manifestFileContents: string) {
+  const manifest: PoetryManifestType = toml.parse(manifestFileContents);
+  if (!manifest.tool?.poetry) {
+    throw new ManifestFileNotValid();
+  }
+  return {
+    name: manifest.tool.poetry.name,
+    version: manifest.tool.poetry.version,
+  };
+}
+
 export function getDependencyNamesFrom(
   manifestFileContents: string,
   includeDevDependencies: boolean,
@@ -34,6 +45,12 @@ export class ManifestFileNotValid extends Error {
   }
 }
 
+export interface PoetryManifest {
+  name: string;
+  version: string;
+  dependencies: string[];
+}
+
 interface PoetryManifestType {
   tool: Tool;
 }
@@ -43,6 +60,8 @@ interface Tool {
 }
 
 interface Poetry {
+  name: string;
+  version: string;
   dependencies: Record<string, string>;
   'dev-dependencies': Record<string, string>;
 }

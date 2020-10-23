@@ -6,10 +6,24 @@ describe('buildDepGraph', () => {
   let depGraphBuilder: DepGraphBuilder;
 
   beforeEach(() => {
-    depGraphBuilder = new DepGraphBuilder({ name: 'poetry' });
+    depGraphBuilder = new DepGraphBuilder(
+      { name: 'poetry' },
+      { name: 'myPkg', version: '1.42.2' },
+    );
   });
 
-  it('oneDepNoTransitives yields a graph with only package and its dep', () => {
+  it('should build a dep-graph with root node named and versioned as per project info in manifest file.', () => {
+    const expectedGraph = depGraphBuilder.build();
+    const manifestContents = `[tool.poetry]
+      name = "myPkg"
+      version = "1.42.2"`;
+    const lockfileContents = `package = []`;
+
+    let result = buildDepGraph(manifestContents, lockfileContents);
+    expect(result.equals(expectedGraph)).toBeTruthy();
+  });
+
+  it('on fixture oneDepNoTransitives yields a graph with only package and its dep', () => {
     const expectedGraph = depGraphBuilder
       .addPkgNode({ name: 'six', version: '1.15.0' }, 'six')
       .connectDep(depGraphBuilder.rootNodeId, 'six')
@@ -22,7 +36,7 @@ describe('buildDepGraph', () => {
     ).toBe(true);
   });
 
-  it('oneDepWithTransitive yields graph with the two packages', () => {
+  it('on fixture oneDepWithTransitive yields graph with the two packages', () => {
     const expectedGraph = depGraphBuilder
       .addPkgNode({ name: 'jinja2', version: '2.11.2' }, 'jinja2')
       .connectDep(depGraphBuilder.rootNodeId, 'jinja2')
@@ -37,7 +51,7 @@ describe('buildDepGraph', () => {
     ).toBe(true);
   });
 
-  describe('oneDepWithOneDevDep yields graph with two packages', () => {
+  describe('on fixture oneDepWithOneDevDep yields graph with two packages', () => {
     const scenarioPath = 'scenarios/one-dep-one-devdep';
 
     it('oneDepWithOneDevDep yields graph with two packages when including dev packages', () => {
@@ -56,7 +70,7 @@ describe('buildDepGraph', () => {
       expect(isEqual).toBe(true);
     });
 
-    it('oneDepWithOneDevDep yields graph with one package when ignoring dev packages', () => {
+    it('on fixture oneDepWithOneDevDep yields graph with one package when ignoring dev packages', () => {
       const includeDevDependencies = false;
       const expectedGraph = depGraphBuilder
         .addPkgNode({ name: 'six', version: '1.15.0' }, 'six')
