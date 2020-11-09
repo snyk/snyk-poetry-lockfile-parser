@@ -13,7 +13,6 @@ export function buildDepGraph(
     includeDevDependencies,
   );
   const packageDetails = manifest.pkgInfoFrom(manifestFileContents);
-
   const pkgSpecs = lockFile.packageSpecsFrom(lockFileContents);
 
   const builder = new DepGraphBuilder({ name: 'poetry' }, packageDetails);
@@ -43,6 +42,8 @@ function addDependenciesFor(
   parentNodeId: string,
   builder: DepGraphBuilder,
 ) {
+  // Poetry will auto-resolve dependencies with hyphens to dashes, but keep transitive reference name with underscore
+  packageName = packageName.replace(/_/g, '-');
   const pkg = pkgLockInfoFor(packageName, pkgSpecs);
   if (!pkg) {
     throw new DependencyNotFound(packageName);
