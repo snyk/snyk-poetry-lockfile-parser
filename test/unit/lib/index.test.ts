@@ -53,7 +53,7 @@ describe('buildDepGraph', () => {
     );
   });
 
-  it('should resolve any dependencies defined with an underscore to hash', () => {
+  it('should resolve any dependencies defined with an underscore to dash', () => {
     const originalPackageName = 'pkg_b';
     const expectedPackageName = 'pkg-b';
     const manifestFileContents = `[tool.poetry.dependencies]
