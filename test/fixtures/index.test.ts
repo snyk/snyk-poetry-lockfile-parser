@@ -84,6 +84,20 @@ describe('buildDepGraph', () => {
       expect(isEqual).toBe(true);
     });
   });
+
+  it('on fixture depWithUnderscore yields graph and successfully resolves dependency with hyphen', () => {
+    const actualDependencyNameSpecified = 'typing_extensions';
+    const expectedDependencyNameFound = 'typing-extensions';
+    const actualGraph = depGraphForScenarioAt('scenarios/dep-with-underscore');
+    const actualDependency = actualGraph.getDepPkgs().find((dependency) => {
+      return dependency.name === actualDependencyNameSpecified;
+    });
+    const expectedDependency = actualGraph.getDepPkgs().find((dependency) => {
+      return dependency.name === expectedDependencyNameFound;
+    });
+    expect(actualDependency).toBeUndefined();
+    expect(expectedDependency).toBeDefined();
+  });
 });
 
 function depGraphForScenarioAt(

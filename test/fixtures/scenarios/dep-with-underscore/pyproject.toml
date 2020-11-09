@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "myPkg"
+version = "1.42.2"
+description = ""
+authors = []
+
+[tool.poetry.dependencies]
+python = "^3.6"
+bokeh = "^2.2.3"
+mypy-boto3-sqs = "^1.16.12"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
