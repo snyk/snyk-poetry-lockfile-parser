@@ -1,0 +1,31 @@
+[[package]]
+category = "main"
+description = "Parallel PyData with Task Scheduling"
+name = "dask"
+optional = false
+python-versions = ">=3.6"
+version = "2020.12.0"
+
+[package.dependencies]
+distributed = ["distributed (>=2.0)"]
+
+[[package]]
+category = "main"
+description = "Distributed scheduler for Dask"
+name = "distributed"
+optional = false
+python-versions = ">=3.6"
+version = "2020.12.0"
+
+[package.dependencies]
+dask = ">=2020.12.0"
+
+[metadata.files]
+dask = [
+    {file = "dask-2020.12.0-py3-none-any.whl", hash = "sha256:5741db6e2426c001cecd374cba3bba8fea16a2da081089376ebcad9f8cf32aca"},
+    {file = "dask-2020.12.0.tar.gz", hash = "sha256:43e745afd4b464e6c0113131e430a16dce6ac42460b06e24d799093d098f7ab0"},
+]
+distributed = [
+    {file = "distributed-2020.12.0-py3-none-any.whl", hash = "sha256:532294b005009ce7c480073e467f9043c5292a735ed535f3fd00517a83a51bfc"},
+    {file = "distributed-2020.12.0.tar.gz", hash = "sha256:2a0b6acc921cd4e0143a7c4383cdcbed7defbc4bd9dc3aab0c7f1c45f14f80e1"},
+]

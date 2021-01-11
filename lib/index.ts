@@ -44,10 +44,25 @@ function addDependenciesFor(
 ) {
   // Poetry will auto-resolve dependencies with hyphens to dashes, but keep transitive reference name with underscore
   packageName = packageName.replace(/_/g, '-');
+
+  // Retrieve package info
   const pkg = pkgLockInfoFor(packageName, pkgSpecs);
   if (!pkg) {
     throw new DependencyNotFound(packageName);
   }
+
+  // Prevent circular references by skipping over packages that have already been added
+  const existingPkg = builder
+    .getPkgs()
+    .find(
+      (existingPkg) =>
+        existingPkg.name === pkg.name && existingPkg.version === pkg.version,
+    );
+  if (existingPkg) {
+    return;
+  }
+
+  // Add package info to builder
   const pkgInfo = { name: packageName, version: pkg.version };
   builder
     .addPkgNode(pkgInfo, packageName)
