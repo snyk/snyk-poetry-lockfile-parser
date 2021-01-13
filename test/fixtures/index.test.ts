@@ -98,6 +98,12 @@ describe('buildDepGraph', () => {
     expect(actualDependency).toBeUndefined();
     expect(expectedDependency).toBeDefined();
   });
+
+  it('on fixture circularDependency yields graph successfully', () => {
+    const actualGraph = depGraphForScenarioAt('scenarios/circular-dependency');
+    expect(actualGraph).toBeDefined();
+    expect(actualGraph.getDepPkgs().length).toBe(2);
+  });
 });
 
 function depGraphForScenarioAt(

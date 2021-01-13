@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "myPkg"
+version = "1.42.2"
+description = "This is not a genuine representation of the install. This is just the minimum producible to illustrate."
+authors = []
+
+[tool.poetry.dependencies]
+python = "^3.6"
+dask = "^2020.12.0"
+distributed = "^2020.12.0"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
