@@ -1,92 +1,21 @@
-import { DepGraph, DepGraphBuilder } from '@snyk/dep-graph';
+import { DepGraph, PkgInfo } from '@snyk/dep-graph';
 import * as manifest from './manifest-parser';
 import * as lockFile from './lock-file-parser';
 import { PoetryLockFileDependency } from './lock-file-parser';
+import * as poetryDepGraphBuilder from './poetry-dep-graph-builder';
 
 export function buildDepGraph(
   manifestFileContents: string,
   lockFileContents: string,
   includeDevDependencies = false,
 ): DepGraph {
-  const dependencyNames = manifest.getDependencyNamesFrom(
+  const dependencyNames: string[] = manifest.getDependencyNamesFrom(
     manifestFileContents,
     includeDevDependencies,
   );
-  const packageDetails = manifest.pkgInfoFrom(manifestFileContents);
-  const pkgSpecs = lockFile.packageSpecsFrom(lockFileContents);
-
-  const builder = new DepGraphBuilder({ name: 'poetry' }, packageDetails);
-  addDependenciesToGraph(
-    dependencyNames,
-    pkgSpecs,
-    builder.rootNodeId,
-    builder,
+  const pkgDetails: PkgInfo = manifest.pkgInfoFrom(manifestFileContents);
+  const pkgSpecs: PoetryLockFileDependency[] = lockFile.packageSpecsFrom(
+    lockFileContents,
   );
-  return builder.build();
+  return poetryDepGraphBuilder.build(pkgDetails, dependencyNames, pkgSpecs);
 }
-
-function addDependenciesToGraph(
-  pkgNames: string[],
-  pkgSpecs: PoetryLockFileDependency[],
-  parentClientId: string,
-  builder: DepGraphBuilder,
-) {
-  for (const pkgName of pkgNames) {
-    addDependenciesFor(pkgName, pkgSpecs, parentClientId, builder);
-  }
-}
-
-function addDependenciesFor(
-  packageName: string,
-  pkgSpecs: PoetryLockFileDependency[],
-  parentNodeId: string,
-  builder: DepGraphBuilder,
-) {
-  // Poetry will auto-resolve dependencies with hyphens to dashes, but keep transitive reference name with underscore
-  packageName = packageName.replace(/_/g, '-');
-
-  // Retrieve package info
-  const pkg = pkgLockInfoFor(packageName, pkgSpecs);
-  if (!pkg) {
-    throw new DependencyNotFound(packageName);
-  }
-
-  // Prevent circular references by skipping over packages that have already been added
-  const existingPkg = builder
-    .getPkgs()
-    .find(
-      (existingPkg) =>
-        existingPkg.name === pkg.name && existingPkg.version === pkg.version,
-    );
-  if (existingPkg) {
-    return;
-  }
-
-  // Add package info to builder
-  const pkgInfo = { name: packageName, version: pkg.version };
-  builder
-    .addPkgNode(pkgInfo, packageName)
-    .connectDep(parentNodeId, packageName);
-  addDependenciesToGraph(pkg.dependencies, pkgSpecs, packageName, builder);
-}
-
-function pkgLockInfoFor(
-  packageName: string,
-  pkgSpecs: PoetryLockFileDependency[],
-) {
-  return pkgSpecs.find((lockItem) => {
-    return lockItem.name.toLowerCase() === packageName.toLowerCase();
-  });
-}
-
-class DependencyNotFound extends Error {
-  constructor(pkgName: string) {
-    super(`Unable to find dependencies in poetry.lock for package: ${pkgName}`);
-    this.name = 'DependencyNotFound';
-  }
-}
-
-export type PoetryParsingError =
-  | manifest.ManifestFileNotValid
-  | lockFile.LockFileNotValid
-  | DependencyNotFound;
