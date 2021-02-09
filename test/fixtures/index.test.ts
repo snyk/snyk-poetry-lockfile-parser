@@ -104,6 +104,13 @@ describe('buildDepGraph', () => {
     expect(actualGraph).toBeDefined();
     expect(actualGraph.getDepPkgs().length).toBe(2);
   });
+
+  it('on fixture with unsafe package yields graph successfully', () => {
+    // Package is in virtualenv and doesn't have an entry in poetry.lock
+    const actualGraph = depGraphForScenarioAt('scenarios/unsafe-packages');
+    expect(actualGraph).toBeDefined();
+    expect(actualGraph.getDepPkgs().length).toBe(1);
+  });
 });
 
 function depGraphForScenarioAt(
