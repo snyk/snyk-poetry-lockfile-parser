@@ -1,7 +1,4 @@
-import {
-  build,
-  DependencyNotFound,
-} from '../../../lib/poetry-dep-graph-builder';
+import { build } from '../../../lib/poetry-dep-graph-builder';
 import { PoetryLockFileDependency } from '../../../lib/lock-file-parser';
 import { PkgInfo } from '@snyk/dep-graph';
 
@@ -79,19 +76,20 @@ describe('poetry-dep-graph-builder', () => {
       expect(bNodes).toHaveLength(1);
     });
 
-    it('should throw DependencyNotFound if metadata cannot be found in pkgSpecs', () => {
+    it('should log warning if metadata cannot be found in pkgSpecs', () => {
       // given
+      const missingPkg = 'non-existent-pkg';
       const pkgA = generatePoetryLockFileDependency('pkg-a', [
         'non-existent-pkg',
       ]);
+      const consoleSpy = jest.spyOn(console, 'warn');
 
       // when
-      const errorResult = () => {
-        build(rootPkg, [pkgA.name], [pkgA]);
-      };
+      build(rootPkg, [pkgA.name], [pkgA]);
 
       // then
-      expect(errorResult).toThrow(DependencyNotFound);
+      const expectedWarningMessage = `Could not find any lockfile metadata for package: ${missingPkg}. This package will not be represented in the dependency graph.`;
+      expect(consoleSpy).toBeCalledWith(expectedWarningMessage);
     });
   });
 });

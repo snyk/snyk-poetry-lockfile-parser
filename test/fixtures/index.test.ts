@@ -111,6 +111,14 @@ describe('buildDepGraph', () => {
     expect(actualGraph).toBeDefined();
     expect(actualGraph.getDepPkgs().length).toBe(1);
   });
+
+  it('on fixture with conflicting python declarations yields graph successfully', () => {
+    jest.spyOn(console, 'warn');
+    const actualGraph = depGraphForScenarioAt(
+      'scenarios/conflicting-python-declarations',
+    );
+    expect(actualGraph).toBeDefined();
+  });
 });
 
 function depGraphForScenarioAt(
