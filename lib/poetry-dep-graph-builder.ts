@@ -46,8 +46,6 @@ function addDependenciesForPkg(
   if (IGNORED_DEPENDENCIES.includes(pkgName)) {
     return;
   }
-  // Poetry will auto-resolve dependencies with hyphens to dashes, but keep transitive reference name with underscore
-  pkgName = pkgName.replace(/_/g, '-');
 
   const pkg = pkgLockInfoFor(pkgName, pkgSpecs);
   if (!pkg || isPkgAlreadyInGraph(pkg, builder)) {

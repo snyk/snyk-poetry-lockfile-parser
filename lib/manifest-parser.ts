@@ -1,14 +1,16 @@
 import * as toml from 'toml';
 
 export function pkgInfoFrom(manifestFileContents: string) {
-  const manifest: PoetryManifestType = toml.parse(manifestFileContents);
-  if (!manifest.tool?.poetry) {
+  let manifest: PoetryManifestType;
+  try {
+    manifest = toml.parse(manifestFileContents);
+    return {
+      name: manifest.tool.poetry.name,
+      version: manifest.tool.poetry.version,
+    };
+  } catch {
     throw new ManifestFileNotValid();
   }
-  return {
-    name: manifest.tool.poetry.name,
-    version: manifest.tool.poetry.version,
-  };
 }
 
 export function getDependencyNamesFrom(
@@ -43,12 +45,6 @@ export class ManifestFileNotValid extends Error {
     super('pyproject.toml is not a valid poetry file.');
     this.name = 'ManifestFileNotValid';
   }
-}
-
-export interface PoetryManifest {
-  name: string;
-  version: string;
-  dependencies: string[];
 }
 
 interface PoetryManifestType {
