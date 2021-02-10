@@ -50,7 +50,7 @@ function addDependenciesForPkg(
   pkgName = pkgName.replace(/_/g, '-');
 
   const pkg = pkgLockInfoFor(pkgName, pkgSpecs);
-  if (isPkgAlreadyInGraph(pkg, builder)) {
+  if (!pkg || isPkgAlreadyInGraph(pkg, builder)) {
     return;
   }
 
@@ -74,20 +74,15 @@ function isPkgAlreadyInGraph(
 function pkgLockInfoFor(
   pkgName: string,
   pkgSpecs: PoetryLockFileDependency[],
-): PoetryLockFileDependency {
+): PoetryLockFileDependency | undefined {
   const pkgLockInfo = pkgSpecs.find(
     (lockItem) => lockItem.name.toLowerCase() === pkgName.toLowerCase(),
   );
 
   if (!pkgLockInfo) {
-    throw new DependencyNotFound(pkgName);
+    console.warn(
+      `Could not find any lockfile metadata for package: ${pkgName}. This package will not be represented in the dependency graph.`,
+    );
   }
   return pkgLockInfo;
-}
-
-export class DependencyNotFound extends Error {
-  constructor(pkgName: string) {
-    super(`Unable to find dependencies in poetry.lock for package: ${pkgName}`);
-    this.name = DependencyNotFound.name;
-  }
 }
