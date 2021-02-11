@@ -40,8 +40,8 @@ describe('buildDepGraph', () => {
     const expectedGraph = depGraphBuilder
       .addPkgNode({ name: 'jinja2', version: '2.11.2' }, 'jinja2')
       .connectDep(depGraphBuilder.rootNodeId, 'jinja2')
-      .addPkgNode({ name: 'MarkupSafe', version: '1.1.1' }, 'MarkupSafe')
-      .connectDep('jinja2', 'MarkupSafe')
+      .addPkgNode({ name: 'markupsafe', version: '1.1.1' }, 'markupsafe')
+      .connectDep('jinja2', 'markupsafe')
       .build();
 
     expect(
@@ -59,8 +59,8 @@ describe('buildDepGraph', () => {
       const expectedGraph = depGraphBuilder
         .addPkgNode({ name: 'six', version: '1.15.0' }, 'six')
         .connectDep(depGraphBuilder.rootNodeId, 'six')
-        .addPkgNode({ name: 'isOdd', version: '0.1.2' }, 'isOdd')
-        .connectDep(depGraphBuilder.rootNodeId, 'isOdd')
+        .addPkgNode({ name: 'isodd', version: '0.1.2' }, 'isodd')
+        .connectDep(depGraphBuilder.rootNodeId, 'isodd')
         .build();
 
       const isEqual = depGraphForScenarioAt(
@@ -99,7 +99,8 @@ describe('buildDepGraph', () => {
   });
 
   it('on fixture with conflicting python declarations yields graph successfully', () => {
-    jest.spyOn(console, 'warn');
+    // Spy only exists here to prevent polluting the logs with a warning log we expect to see
+    jest.spyOn(console, 'warn').mockImplementation();
     const actualGraph = depGraphForScenarioAt(
       'scenarios/conflicting-python-declarations',
     );

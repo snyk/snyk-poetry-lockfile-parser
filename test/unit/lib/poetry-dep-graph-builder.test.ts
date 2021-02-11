@@ -9,12 +9,12 @@ describe('poetry-dep-graph-builder', () => {
     it('should return a graph of given dependencies successfully', () => {
       // given
       const pkgA = generatePoetryLockFileDependency('pkg-a');
-      const pkgB = generatePoetryLockFileDependency('pkg-b', ['pkg-c']);
+      const pkgB = generatePoetryLockFileDependency('pkg_b', ['pkg-c']);
       const pkgC = generatePoetryLockFileDependency('pkg-c');
       const pkgSpecs: PoetryLockFileDependency[] = [pkgA, pkgB, pkgC];
 
       // when
-      const result = build(rootPkg, ['pkg-a', 'pkg-b'], pkgSpecs);
+      const result = build(rootPkg, ['pkg-a', 'pkg_b'], pkgSpecs);
 
       // then
       const resultGraph = result.toJSON().graph;
@@ -68,12 +68,40 @@ describe('poetry-dep-graph-builder', () => {
       expect(result).toBeDefined();
       const aNodes = result
         .toJSON()
-        .graph.nodes.filter((node) => node.nodeId === 'pkg-a');
+        .graph.nodes.filter((node) => node.nodeId === pkgA.name);
       const bNodes = result
         .toJSON()
-        .graph.nodes.filter((node) => node.nodeId === 'pkg-b');
+        .graph.nodes.filter((node) => node.nodeId === pkgB.name);
       expect(aNodes).toHaveLength(1);
       expect(bNodes).toHaveLength(1);
+    });
+
+    it('should treat underscores in manifest as equal to hyphens in lockfile', () => {
+      // given
+      const pkgA = generatePoetryLockFileDependency('pkg-a');
+
+      // when
+      const result = build(rootPkg, ['pkg_a'], [pkgA]);
+
+      // then
+      expect(result).toBeDefined();
+      const hyphenatedNode = result
+        .toJSON()
+        .graph.nodes.filter((node) => node.nodeId === pkgA.name);
+    });
+
+    it('should treat hyphens in manifest as equal to underscores in lockfile', () => {
+      // given
+      const pkgA = generatePoetryLockFileDependency('pkg_a');
+
+      // when
+      const result = build(rootPkg, ['pkg-a'], [pkgA]);
+
+      // then
+      expect(result).toBeDefined();
+      const hyphenatedNode = result
+        .toJSON()
+        .graph.nodes.filter((node) => node.nodeId === pkgA.name);
     });
 
     it('should log warning if metadata cannot be found in pkgSpecs', () => {
@@ -82,7 +110,7 @@ describe('poetry-dep-graph-builder', () => {
       const pkgA = generatePoetryLockFileDependency('pkg-a', [
         'non-existent-pkg',
       ]);
-      const consoleSpy = jest.spyOn(console, 'warn');
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
 
       // when
       build(rootPkg, [pkgA.name], [pkgA]);

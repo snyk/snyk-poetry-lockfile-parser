@@ -52,9 +52,9 @@ function addDependenciesForPkg(
     return;
   }
 
-  const pkgInfo: PkgInfo = { name: pkgName, version: pkg.version };
-  builder.addPkgNode(pkgInfo, pkgName).connectDep(parentNodeId, pkgName);
-  addDependenciesToGraph(pkg.dependencies, pkgSpecs, pkgName, builder);
+  const pkgInfo: PkgInfo = { name: pkg.name, version: pkg.version };
+  builder.addPkgNode(pkgInfo, pkg.name).connectDep(parentNodeId, pkg.name);
+  addDependenciesToGraph(pkg.dependencies, pkgSpecs, pkg.name, builder);
 }
 
 function isPkgAlreadyInGraph(
@@ -73,8 +73,15 @@ function pkgLockInfoFor(
   pkgName: string,
   pkgSpecs: PoetryLockFileDependency[],
 ): PoetryLockFileDependency | undefined {
+  // From PEP 426 https://www.python.org/dev/peps/pep-0426/#name
+  // All comparisons of distribution names MUST be case insensitive, and MUST
+  // consider hyphens and underscores to be equivalent
   const pkgLockInfo = pkgSpecs.find(
-    (lockItem) => lockItem.name.toLowerCase() === pkgName.toLowerCase(),
+    (lockItem) =>
+      lockItem.name.toLowerCase().replace(/_/g, '-') ===
+        pkgName.toLowerCase().replace(/_/g, '-') ||
+      lockItem.name.toLowerCase().replace(/-/g, '_') ===
+        pkgName.toLowerCase().replace(/-/g, '_'),
   );
 
   if (!pkgLockInfo) {
