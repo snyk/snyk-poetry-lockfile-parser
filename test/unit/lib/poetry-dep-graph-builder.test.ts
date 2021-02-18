@@ -60,9 +60,14 @@ describe('poetry-dep-graph-builder', () => {
       // given
       const pkgA = generatePoetryLockFileDependency('pkg-a', ['pkg-b']);
       const pkgB = generatePoetryLockFileDependency('pkg-b', ['pkg-a']);
+      const pkgC = generatePoetryLockFileDependency('pkg-c', ['pkg-a']);
 
       // when
-      const result = build(rootPkg, [pkgA.name, pkgB.name], [pkgA, pkgB]);
+      const result = build(
+        rootPkg,
+        [pkgA.name, pkgB.name, pkgC.name],
+        [pkgA, pkgB, pkgC],
+      );
 
       // then
       expect(result).toBeDefined();
@@ -72,8 +77,13 @@ describe('poetry-dep-graph-builder', () => {
       const bNodes = result
         .toJSON()
         .graph.nodes.filter((node) => node.nodeId === pkgB.name);
+      const cNode = result
+        .toJSON()
+        .graph.nodes.find((node) => node.nodeId === pkgC.name);
       expect(aNodes).toHaveLength(1);
       expect(bNodes).toHaveLength(1);
+      expect(cNode).toBeDefined();
+      expect(cNode!.deps).toHaveLength(1);
     });
 
     it('should treat underscores in manifest as equal to hyphens in lockfile', () => {
