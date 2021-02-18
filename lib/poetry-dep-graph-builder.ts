@@ -48,7 +48,11 @@ function addDependenciesForPkg(
   }
 
   const pkg = pkgLockInfoFor(pkgName, pkgSpecs);
-  if (!pkg || isPkgAlreadyInGraph(pkg, builder)) {
+  if (!pkg) {
+    return;
+  }
+  if (isPkgAlreadyInGraph(pkg, builder)) {
+    builder.connectDep(parentNodeId, pkg.name);
     return;
   }
 
