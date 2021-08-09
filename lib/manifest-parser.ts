@@ -1,9 +1,11 @@
-import * as toml from 'toml';
+import * as toml from '@iarna/toml';
 
 export function pkgInfoFrom(manifestFileContents: string) {
   let manifest: PoetryManifestType;
   try {
-    manifest = toml.parse(manifestFileContents);
+    manifest = toml.parse(
+      manifestFileContents,
+    ) as unknown as PoetryManifestType;
     return {
       name: manifest.tool.poetry.name,
       version: manifest.tool.poetry.version,
@@ -17,7 +19,9 @@ export function getDependencyNamesFrom(
   manifestFileContents: string,
   includeDevDependencies: boolean,
 ): string[] {
-  const manifest: PoetryManifestType = toml.parse(manifestFileContents);
+  const manifest = toml.parse(
+    manifestFileContents,
+  ) as unknown as PoetryManifestType;
   if (!manifest.tool?.poetry) {
     throw new ManifestFileNotValid();
   }

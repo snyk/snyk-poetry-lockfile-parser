@@ -80,5 +80,13 @@ describe('when loading manifest files', () => {
       const poetryDependencies = getDependencyNamesFrom('[tool.poetry]', false);
       expect(poetryDependencies.length).toBe(0);
     });
+
+    it('should handle quoted keys in inline tables', () => {
+      const fileContents = `[tool.poetry.dependencies]
+      pkg_a = {"version" = "^1.0"}`;
+      const poetryDependencies = getDependencyNamesFrom(fileContents, false);
+      expect(poetryDependencies.length).toBe(1);
+      expect(poetryDependencies.includes('pkg_a')).toBe(true);
+    });
   });
 });

@@ -1,9 +1,10 @@
-import * as toml from 'toml';
+import * as toml from '@iarna/toml';
 
 export function packageSpecsFrom(
   lockFileContents: string,
 ): PoetryLockFileDependency[] {
-  const lockFile: PoetryLockFile = toml.parse(lockFileContents);
+  const lockFile = toml.parse(lockFileContents) as unknown as PoetryLockFile;
+
   if (!lockFile.package) {
     throw new LockFileNotValid();
   }
