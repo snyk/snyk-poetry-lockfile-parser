@@ -14,8 +14,7 @@ export function buildDepGraph(
     includeDevDependencies,
   );
   const pkgDetails: PkgInfo = manifest.pkgInfoFrom(manifestFileContents);
-  const pkgSpecs: PoetryLockFileDependency[] = lockFile.packageSpecsFrom(
-    lockFileContents,
-  );
+  const pkgSpecs: PoetryLockFileDependency[] =
+    lockFile.packageSpecsFrom(lockFileContents);
   return poetryDepGraphBuilder.build(pkgDetails, dependencyNames, pkgSpecs);
 }
