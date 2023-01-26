@@ -85,6 +85,114 @@ describe('buildDepGraph', () => {
     });
   });
 
+  describe('on fixture oneDevDepWithOneDevDepGroup yields graph with two packages', () => {
+    const scenarioPath = 'scenarios/one-dep-one-devdep-group';
+
+    it('oneDevDepWithOneDevDepGroup yields graph with two packages when including dev packages', () => {
+      const includeDevDependencies = true;
+      const expectedGraph = depGraphBuilder
+        .addPkgNode({ name: 'six', version: '1.16.0' }, 'six')
+        .connectDep(depGraphBuilder.rootNodeId, 'six')
+        .addPkgNode({ name: 'isodd', version: '0.1.2' }, 'isodd')
+        .connectDep(depGraphBuilder.rootNodeId, 'isodd')
+        .build();
+
+      const isEqual = depGraphForScenarioAt(
+        scenarioPath,
+        includeDevDependencies,
+      ).equals(expectedGraph);
+      expect(isEqual).toBe(true);
+    });
+
+    it('on fixture oneDevDepWithOneDevDepGroup yields graph with one package when ignoring dev packages', () => {
+      const includeDevDependencies = false;
+      const expectedGraph = depGraphBuilder
+        .addPkgNode({ name: 'six', version: '1.16.0' }, 'six')
+        .connectDep(depGraphBuilder.rootNodeId, 'six')
+        .build();
+
+      const isEqual = depGraphForScenarioAt(
+        scenarioPath,
+        includeDevDependencies,
+      ).equals(expectedGraph);
+      expect(isEqual).toBe(true);
+    });
+  });
+
+  describe('on fixture oneDepWithOneDevDepAndOneDevDepGroup yields graph with three packages', () => {
+    const scenarioPath = 'scenarios/one-dep-one-devdep-one-devdep-group';
+
+    it('oneDepWithOneDevDepAndOneDevDepGroup yields graph with three packages when including dev packages', () => {
+      const includeDevDependencies = true;
+      const expectedGraph = depGraphBuilder
+        .addPkgNode({ name: 'six', version: '1.16.0' }, 'six')
+        .connectDep(depGraphBuilder.rootNodeId, 'six')
+        .addPkgNode({ name: 'isodd', version: '0.1.2' }, 'isodd')
+        .connectDep(depGraphBuilder.rootNodeId, 'isodd')
+        .addPkgNode({ name: 'simple-enum', version: '0.0.6' }, 'simple-enum')
+        .connectDep(depGraphBuilder.rootNodeId, 'simple-enum')
+        .build();
+
+      const isEqual = depGraphForScenarioAt(
+        scenarioPath,
+        includeDevDependencies,
+      ).equals(expectedGraph);
+      expect(isEqual).toBe(true);
+    });
+
+    it('on fixture oneDepWithOneDevDepAndOneDevDepGroup yields graph with one package when ignoring dev packages', () => {
+      const includeDevDependencies = false;
+      const expectedGraph = depGraphBuilder
+        .addPkgNode({ name: 'six', version: '1.16.0' }, 'six')
+        .connectDep(depGraphBuilder.rootNodeId, 'six')
+        .build();
+
+      const isEqual = depGraphForScenarioAt(
+        scenarioPath,
+        includeDevDependencies,
+      ).equals(expectedGraph);
+      expect(isEqual).toBe(true);
+    });
+  });
+
+  describe('on fixture oneDepWithOneDevDepAndMultipleDevDepGroups yields graph with three packages', () => {
+    const scenarioPath = 'scenarios/one-dep-one-devdep-multiple-devdep-groups';
+
+    it('oneDepWithOneDevDepAndMultipleDevDepGroups yields graph with three packages when including dev packages', () => {
+      const includeDevDependencies = true;
+      const expectedGraph = depGraphBuilder
+        .addPkgNode({ name: 'six', version: '1.16.0' }, 'six')
+        .connectDep(depGraphBuilder.rootNodeId, 'six')
+        .addPkgNode({ name: 'isodd', version: '0.1.2' }, 'isodd')
+        .connectDep(depGraphBuilder.rootNodeId, 'isodd')
+        .addPkgNode({ name: 'simple-enum', version: '0.0.6' }, 'simple-enum')
+        .connectDep(depGraphBuilder.rootNodeId, 'simple-enum')
+        .addPkgNode({ name: 'whattype', version: '0.0.1' }, 'whattype')
+        .connectDep(depGraphBuilder.rootNodeId, 'whattype')
+        .build();
+
+      const isEqual = depGraphForScenarioAt(
+        scenarioPath,
+        includeDevDependencies,
+      ).equals(expectedGraph);
+      expect(isEqual).toBe(true);
+    });
+
+    it('on fixture oneDepWithOneDevDepAndMultipleDevDepGroups yields graph with one package when ignoring dev packages', () => {
+      const includeDevDependencies = false;
+      const expectedGraph = depGraphBuilder
+        .addPkgNode({ name: 'six', version: '1.16.0' }, 'six')
+        .connectDep(depGraphBuilder.rootNodeId, 'six')
+        .build();
+
+      const isEqual = depGraphForScenarioAt(
+        scenarioPath,
+        includeDevDependencies,
+      ).equals(expectedGraph);
+      expect(isEqual).toBe(true);
+    });
+  });
+
   it('on fixture circularDependency yields graph successfully', () => {
     const actualGraph = depGraphForScenarioAt('scenarios/circular-dependency');
     expect(actualGraph).toBeDefined();
