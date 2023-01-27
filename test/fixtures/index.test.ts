@@ -25,7 +25,9 @@ describe('buildDepGraph', () => {
 
   it('on fixture oneDepNoTransitives yields a graph with only package and its dep', () => {
     const expectedGraph = depGraphBuilder
-      .addPkgNode({ name: 'six', version: '1.15.0' }, 'six')
+      .addPkgNode({ name: 'six', version: '1.15.0' }, 'six', {
+        labels: { scope: 'prod' },
+      })
       .connectDep(depGraphBuilder.rootNodeId, 'six')
       .build();
 
@@ -38,9 +40,13 @@ describe('buildDepGraph', () => {
 
   it('on fixture oneDepWithTransitive yields graph with the two packages', () => {
     const expectedGraph = depGraphBuilder
-      .addPkgNode({ name: 'jinja2', version: '2.11.2' }, 'jinja2')
+      .addPkgNode({ name: 'jinja2', version: '2.11.2' }, 'jinja2', {
+        labels: { scope: 'prod' },
+      })
       .connectDep(depGraphBuilder.rootNodeId, 'jinja2')
-      .addPkgNode({ name: 'markupsafe', version: '1.1.1' }, 'markupsafe')
+      .addPkgNode({ name: 'markupsafe', version: '1.1.1' }, 'markupsafe', {
+        labels: { scope: 'prod' },
+      })
       .connectDep('jinja2', 'markupsafe')
       .build();
 
@@ -57,9 +63,13 @@ describe('buildDepGraph', () => {
     it('oneDepWithOneDevDep yields graph with two packages when including dev packages', () => {
       const includeDevDependencies = true;
       const expectedGraph = depGraphBuilder
-        .addPkgNode({ name: 'six', version: '1.15.0' }, 'six')
+        .addPkgNode({ name: 'six', version: '1.15.0' }, 'six', {
+          labels: { scope: 'prod' },
+        })
         .connectDep(depGraphBuilder.rootNodeId, 'six')
-        .addPkgNode({ name: 'isodd', version: '0.1.2' }, 'isodd')
+        .addPkgNode({ name: 'isodd', version: '0.1.2' }, 'isodd', {
+          labels: { scope: 'dev' },
+        })
         .connectDep(depGraphBuilder.rootNodeId, 'isodd')
         .build();
 
@@ -73,7 +83,9 @@ describe('buildDepGraph', () => {
     it('on fixture oneDepWithOneDevDep yields graph with one package when ignoring dev packages', () => {
       const includeDevDependencies = false;
       const expectedGraph = depGraphBuilder
-        .addPkgNode({ name: 'six', version: '1.15.0' }, 'six')
+        .addPkgNode({ name: 'six', version: '1.15.0' }, 'six', {
+          labels: { scope: 'prod' },
+        })
         .connectDep(depGraphBuilder.rootNodeId, 'six')
         .build();
 
@@ -91,9 +103,13 @@ describe('buildDepGraph', () => {
     it('oneDevDepWithOneDevDepGroup yields graph with two packages when including dev packages', () => {
       const includeDevDependencies = true;
       const expectedGraph = depGraphBuilder
-        .addPkgNode({ name: 'six', version: '1.16.0' }, 'six')
+        .addPkgNode({ name: 'six', version: '1.16.0' }, 'six', {
+          labels: { scope: 'prod' },
+        })
         .connectDep(depGraphBuilder.rootNodeId, 'six')
-        .addPkgNode({ name: 'isodd', version: '0.1.2' }, 'isodd')
+        .addPkgNode({ name: 'isodd', version: '0.1.2' }, 'isodd', {
+          labels: { scope: 'dev' },
+        })
         .connectDep(depGraphBuilder.rootNodeId, 'isodd')
         .build();
 
@@ -107,7 +123,9 @@ describe('buildDepGraph', () => {
     it('on fixture oneDevDepWithOneDevDepGroup yields graph with one package when ignoring dev packages', () => {
       const includeDevDependencies = false;
       const expectedGraph = depGraphBuilder
-        .addPkgNode({ name: 'six', version: '1.16.0' }, 'six')
+        .addPkgNode({ name: 'six', version: '1.16.0' }, 'six', {
+          labels: { scope: 'prod' },
+        })
         .connectDep(depGraphBuilder.rootNodeId, 'six')
         .build();
 
@@ -125,11 +143,17 @@ describe('buildDepGraph', () => {
     it('oneDepWithOneDevDepAndOneDevDepGroup yields graph with three packages when including dev packages', () => {
       const includeDevDependencies = true;
       const expectedGraph = depGraphBuilder
-        .addPkgNode({ name: 'six', version: '1.16.0' }, 'six')
+        .addPkgNode({ name: 'six', version: '1.16.0' }, 'six', {
+          labels: { scope: 'prod' },
+        })
         .connectDep(depGraphBuilder.rootNodeId, 'six')
-        .addPkgNode({ name: 'isodd', version: '0.1.2' }, 'isodd')
+        .addPkgNode({ name: 'isodd', version: '0.1.2' }, 'isodd', {
+          labels: { scope: 'dev' },
+        })
         .connectDep(depGraphBuilder.rootNodeId, 'isodd')
-        .addPkgNode({ name: 'simple-enum', version: '0.0.6' }, 'simple-enum')
+        .addPkgNode({ name: 'simple-enum', version: '0.0.6' }, 'simple-enum', {
+          labels: { scope: 'dev' },
+        })
         .connectDep(depGraphBuilder.rootNodeId, 'simple-enum')
         .build();
 
@@ -143,7 +167,9 @@ describe('buildDepGraph', () => {
     it('on fixture oneDepWithOneDevDepAndOneDevDepGroup yields graph with one package when ignoring dev packages', () => {
       const includeDevDependencies = false;
       const expectedGraph = depGraphBuilder
-        .addPkgNode({ name: 'six', version: '1.16.0' }, 'six')
+        .addPkgNode({ name: 'six', version: '1.16.0' }, 'six', {
+          labels: { scope: 'prod' },
+        })
         .connectDep(depGraphBuilder.rootNodeId, 'six')
         .build();
 
@@ -161,13 +187,21 @@ describe('buildDepGraph', () => {
     it('oneDepWithOneDevDepAndMultipleDevDepGroups yields graph with three packages when including dev packages', () => {
       const includeDevDependencies = true;
       const expectedGraph = depGraphBuilder
-        .addPkgNode({ name: 'six', version: '1.16.0' }, 'six')
+        .addPkgNode({ name: 'six', version: '1.16.0' }, 'six', {
+          labels: { scope: 'prod' },
+        })
         .connectDep(depGraphBuilder.rootNodeId, 'six')
-        .addPkgNode({ name: 'isodd', version: '0.1.2' }, 'isodd')
+        .addPkgNode({ name: 'isodd', version: '0.1.2' }, 'isodd', {
+          labels: { scope: 'dev' },
+        })
         .connectDep(depGraphBuilder.rootNodeId, 'isodd')
-        .addPkgNode({ name: 'simple-enum', version: '0.0.6' }, 'simple-enum')
+        .addPkgNode({ name: 'simple-enum', version: '0.0.6' }, 'simple-enum', {
+          labels: { scope: 'dev' },
+        })
         .connectDep(depGraphBuilder.rootNodeId, 'simple-enum')
-        .addPkgNode({ name: 'whattype', version: '0.0.1' }, 'whattype')
+        .addPkgNode({ name: 'whattype', version: '0.0.1' }, 'whattype', {
+          labels: { scope: 'dev' },
+        })
         .connectDep(depGraphBuilder.rootNodeId, 'whattype')
         .build();
 
@@ -181,7 +215,9 @@ describe('buildDepGraph', () => {
     it('on fixture oneDepWithOneDevDepAndMultipleDevDepGroups yields graph with one package when ignoring dev packages', () => {
       const includeDevDependencies = false;
       const expectedGraph = depGraphBuilder
-        .addPkgNode({ name: 'six', version: '1.16.0' }, 'six')
+        .addPkgNode({ name: 'six', version: '1.16.0' }, 'six', {
+          labels: { scope: 'prod' },
+        })
         .connectDep(depGraphBuilder.rootNodeId, 'six')
         .build();
 
