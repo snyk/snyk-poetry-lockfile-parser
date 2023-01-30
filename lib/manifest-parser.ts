@@ -1,6 +1,7 @@
 import * as toml from '@iarna/toml';
+import { PkgInfo } from '@snyk/dep-graph';
 
-export function pkgInfoFrom(manifestFileContents: string) {
+export function pkgInfoFrom(manifestFileContents: string): PkgInfo {
   let manifest: PoetryManifestType;
   try {
     manifest = toml.parse(
@@ -15,10 +16,10 @@ export function pkgInfoFrom(manifestFileContents: string) {
   }
 }
 
-export function getDependencyNamesFrom(
+export function getDependenciesFrom(
   manifestFileContents: string,
   includeDevDependencies: boolean,
-): string[] {
+): Dependency[] {
   const manifest = toml.parse(
     manifestFileContents,
   ) as unknown as PoetryManifestType;
@@ -26,13 +27,19 @@ export function getDependencyNamesFrom(
     throw new ManifestFileNotValid();
   }
 
-  const dependencies = dependenciesFrom(manifest);
-  const devDependencies: string[] = includeDevDependencies
-    ? devDependenciesFrom(manifest)
-    : [];
+  const dependencies: Dependency[] = dependenciesFrom(manifest).map((dep) => ({
+    name: dep,
+    isDev: false,
+  }));
+  const devDependencies: Dependency[] = (
+    includeDevDependencies ? devDependenciesFrom(manifest) : []
+  ).map((devDep) => ({
+    name: devDep,
+    isDev: true,
+  }));
 
   return [...dependencies, ...devDependencies].filter(
-    (pkgName) => pkgName != 'python',
+    (pkg) => pkg.name != 'python',
   );
 }
 
@@ -95,4 +102,9 @@ interface Poetry {
   dependencies: Dependencies;
   'dev-dependencies': Dependencies;
   group: Group;
+}
+
+export interface Dependency {
+  name: string;
+  isDev: boolean;
 }

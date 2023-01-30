@@ -14,7 +14,14 @@ describe('poetry-dep-graph-builder', () => {
       const pkgSpecs: PoetryLockFileDependency[] = [pkgA, pkgB, pkgC];
 
       // when
-      const result = build(rootPkg, ['pkg-a', 'pkg_b'], pkgSpecs);
+      const result = build(
+        rootPkg,
+        [
+          { name: 'pkg-a', isDev: false },
+          { name: 'pkg-b', isDev: false },
+        ],
+        pkgSpecs,
+      );
 
       // then
       const resultGraph = result.toJSON().graph;
@@ -45,7 +52,7 @@ describe('poetry-dep-graph-builder', () => {
       ];
 
       // when
-      const result = build(rootPkg, [pkgA.name], [pkgA]);
+      const result = build(rootPkg, [{ name: 'pkg-a', isDev: false }], [pkgA]);
 
       // then
       const resultGraph = result.toJSON().graph;
@@ -65,7 +72,11 @@ describe('poetry-dep-graph-builder', () => {
       // when
       const result = build(
         rootPkg,
-        [pkgA.name, pkgB.name, pkgC.name],
+        [
+          { name: 'pkg-a', isDev: false },
+          { name: 'pkg-b', isDev: false },
+          { name: 'pkg-c', isDev: false },
+        ],
         [pkgA, pkgB, pkgC],
       );
 
@@ -91,7 +102,7 @@ describe('poetry-dep-graph-builder', () => {
       const pkgA = generatePoetryLockFileDependency('pkg-a');
 
       // when
-      const result = build(rootPkg, ['pkg_a'], [pkgA]);
+      const result = build(rootPkg, [{ name: 'pkg-a', isDev: false }], [pkgA]);
 
       // then
       expect(result).toBeDefined();
@@ -105,7 +116,7 @@ describe('poetry-dep-graph-builder', () => {
       const pkgA = generatePoetryLockFileDependency('pkg_a');
 
       // when
-      const result = build(rootPkg, ['pkg-a'], [pkgA]);
+      const result = build(rootPkg, [{ name: 'pkg-a', isDev: false }], [pkgA]);
 
       // then
       expect(result).toBeDefined();
@@ -123,7 +134,7 @@ describe('poetry-dep-graph-builder', () => {
       const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
 
       // when
-      build(rootPkg, [pkgA.name], [pkgA]);
+      build(rootPkg, [{ name: 'pkg-a', isDev: false }], [pkgA]);
 
       // then
       const expectedWarningMessage = `Could not find any lockfile metadata for package: ${missingPkg}. This package will not be represented in the dependency graph.`;
