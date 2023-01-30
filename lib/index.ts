@@ -9,12 +9,12 @@ export function buildDepGraph(
   lockFileContents: string,
   includeDevDependencies = false,
 ): DepGraph {
-  const dependencyNames: string[] = manifest.getDependencyNamesFrom(
+  const dependencies: manifest.Dependency[] = manifest.getDependenciesFrom(
     manifestFileContents,
     includeDevDependencies,
   );
   const pkgDetails: PkgInfo = manifest.pkgInfoFrom(manifestFileContents);
   const pkgSpecs: PoetryLockFileDependency[] =
     lockFile.packageSpecsFrom(lockFileContents);
-  return poetryDepGraphBuilder.build(pkgDetails, dependencyNames, pkgSpecs);
+  return poetryDepGraphBuilder.build(pkgDetails, dependencies, pkgSpecs);
 }

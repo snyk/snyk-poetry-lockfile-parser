@@ -1,6 +1,7 @@
 import * as toml from '@iarna/toml';
+import { PkgInfo } from '@snyk/dep-graph';
 
-export function pkgInfoFrom(manifestFileContents: string) {
+export function pkgInfoFrom(manifestFileContents: string): PkgInfo {
   let manifest: PoetryManifestType;
   try {
     manifest = toml.parse(
@@ -15,10 +16,10 @@ export function pkgInfoFrom(manifestFileContents: string) {
   }
 }
 
-export function getDependencyNamesFrom(
+export function getDependenciesFrom(
   manifestFileContents: string,
   includeDevDependencies: boolean,
-): string[] {
+): Dependency[] {
   const manifest = toml.parse(
     manifestFileContents,
   ) as unknown as PoetryManifestType;
@@ -26,21 +27,51 @@ export function getDependencyNamesFrom(
     throw new ManifestFileNotValid();
   }
 
-  const dependencies = dependenciesFrom(manifest);
-  const devDependencies: string[] = includeDevDependencies
-    ? devDependenciesFrom(manifest)
-    : [];
+  const dependencies: Dependency[] = dependenciesFrom(manifest).map((dep) => ({
+    name: dep,
+    isDev: false,
+  }));
+  const devDependencies: Dependency[] = (
+    includeDevDependencies ? devDependenciesFrom(manifest) : []
+  ).map((devDep) => ({
+    name: devDep,
+    isDev: true,
+  }));
 
   return [...dependencies, ...devDependencies].filter(
-    (pkgName) => pkgName != 'python',
+    (pkg) => pkg.name != 'python',
   );
 }
 
-function devDependenciesFrom(manifest: PoetryManifestType) {
-  return Object.keys(manifest.tool.poetry['dev-dependencies'] || []);
+const getGroupDevDepNames = (obj: Group): string[] => {
+  const groupDevDepNames = Object.values(obj)
+    .map((group) => group.dependencies)
+    .map((depsObj) => Object.keys(depsObj))
+    .reduce((acc, curr) => [...acc, ...curr], []);
+
+  return groupDevDepNames;
+};
+
+function getAllDevDependencyNames(manifest: PoetryManifestType): string[] {
+  // pre-v1.2.0 naming convention
+  const devDepsProperty = Object.keys(
+    manifest.tool.poetry['dev-dependencies'] ?? [],
+  );
+  // post-v1.2.0 dependency groups
+  // https://python-poetry.org/docs/master/managing-dependencies
+  // we will handle all tool.poetry.group.<group> as dev-deps
+  const groupDevDepsProperty = manifest.tool.poetry.group
+    ? getGroupDevDepNames(manifest.tool.poetry.group)
+    : [];
+
+  return [...devDepsProperty, ...groupDevDepsProperty];
 }
 
-function dependenciesFrom(manifest: PoetryManifestType) {
+function devDependenciesFrom(manifest: PoetryManifestType): string[] {
+  return getAllDevDependencyNames(manifest);
+}
+
+function dependenciesFrom(manifest: PoetryManifestType): string[] {
   return Object.keys(manifest.tool.poetry.dependencies || []);
 }
 
@@ -59,9 +90,21 @@ interface Tool {
   poetry: Poetry;
 }
 
+type Dependencies = Record<string, string>;
+
+type GroupDependencies = { dependencies: Dependencies }; // 'dependencies' is a required property
+
+type Group = Record<string, GroupDependencies>;
+
 interface Poetry {
   name: string;
   version: string;
-  dependencies: Record<string, string>;
-  'dev-dependencies': Record<string, string>;
+  dependencies: Dependencies;
+  'dev-dependencies': Dependencies;
+  group: Group;
+}
+
+export interface Dependency {
+  name: string;
+  isDev: boolean;
 }

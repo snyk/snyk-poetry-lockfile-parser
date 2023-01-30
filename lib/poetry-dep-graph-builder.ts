@@ -1,5 +1,6 @@
 import { DepGraph, DepGraphBuilder, PkgInfo } from '@snyk/dep-graph';
 import { PoetryLockFileDependency } from './lock-file-parser';
+import { Dependency } from './manifest-parser';
 
 // Poetry uses the virtualenv to create an environment and this comes with these
 // packages pre-installed, therefore they won't be part of the lockfile.
@@ -13,40 +14,35 @@ const IGNORED_DEPENDENCIES: string[] = [
 
 export function build(
   pkgDetails: PkgInfo,
-  pkgDependencyNames: string[],
+  dependencies: Dependency[],
   pkgSpecs: PoetryLockFileDependency[],
 ): DepGraph {
   const builder = new DepGraphBuilder({ name: 'poetry' }, pkgDetails);
-  addDependenciesToGraph(
-    pkgDependencyNames,
-    pkgSpecs,
-    builder.rootNodeId,
-    builder,
-  );
+  addDependenciesToGraph(dependencies, pkgSpecs, builder.rootNodeId, builder);
   return builder.build();
 }
 
 function addDependenciesToGraph(
-  pkgNames: string[],
+  dependencies: Dependency[],
   pkgSpecs: PoetryLockFileDependency[],
   parentNodeId: string,
   builder: DepGraphBuilder,
 ) {
-  for (const pkgName of pkgNames) {
-    addDependenciesForPkg(pkgName, pkgSpecs, parentNodeId, builder);
+  for (const dep of dependencies) {
+    addDependenciesForPkg(dep, pkgSpecs, parentNodeId, builder);
   }
 }
 
 function addDependenciesForPkg(
-  pkgName: string,
+  dependency: Dependency,
   pkgSpecs: PoetryLockFileDependency[],
   parentNodeId: string,
   builder: DepGraphBuilder,
 ) {
+  const pkgName = dependency.name;
   if (IGNORED_DEPENDENCIES.includes(pkgName)) {
     return;
   }
-
   const pkg = pkgLockInfoFor(pkgName, pkgSpecs);
   if (!pkg) {
     return;
@@ -57,8 +53,20 @@ function addDependenciesForPkg(
   }
 
   const pkgInfo: PkgInfo = { name: pkg.name, version: pkg.version };
-  builder.addPkgNode(pkgInfo, pkg.name).connectDep(parentNodeId, pkg.name);
-  addDependenciesToGraph(pkg.dependencies, pkgSpecs, pkg.name, builder);
+  builder
+    .addPkgNode(pkgInfo, pkg.name, {
+      labels: { scope: dependency.isDev ? 'dev' : 'prod' },
+    })
+    .connectDep(parentNodeId, pkg.name);
+  addDependenciesToGraph(
+    pkg.dependencies.map((dep) => ({
+      name: dep,
+      isDev: dependency.isDev,
+    })),
+    pkgSpecs,
+    pkg.name,
+    builder,
+  );
 }
 
 function isPkgAlreadyInGraph(

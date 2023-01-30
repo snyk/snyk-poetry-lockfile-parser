@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "myPkg"
+version = "1.42.2"
+description = ""
+authors = []
+
+[tool.poetry.dependencies]
+six = "^1.14"
+
+[tool.poetry.dev-dependencies]
+isOdd = "0.1.2"
+
+[tool.poetry.group.dev.dependencies]
+simple-enum = "0.0.6"
+
+[tool.poetry.group.more-dev.dependencies]
+whatType="0.0.1"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
