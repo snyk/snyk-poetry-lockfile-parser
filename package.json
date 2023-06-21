@@ -31,7 +31,7 @@
   "dependencies": {
     "@iarna/toml": "^2.2.5",
     "@snyk/cli-interface": "^2.9.2",
-    "@snyk/dep-graph": "^1.23.0",
+    "@snyk/dep-graph": "^2.3.0",
     "debug": "^4.2.0",
     "tslib": "^2.0.0"
   },
