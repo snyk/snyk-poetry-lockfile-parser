@@ -20,6 +20,11 @@ commands:
       - run:
           name: Test
           command: npm test
+  test-coverage:
+    steps:
+      - run:
+          name: Test
+          command: npm run test:coverage
   release:
     steps:
       - run:
@@ -44,7 +49,18 @@ jobs:
     steps:
       - checkout
       - install
-      - test
+      # This is a workaround because coverage involves a library that does not support node 8 anymore
+      - when:
+          condition:
+            equal: ["8.17.0", << parameters.version >>]
+          steps:
+            - test
+      - when:
+          condition:
+            not: 
+              equal: ["8.17.0", << parameters.version >>]
+          steps:
+            - test-coverage
 
   release:
     resource_class: small

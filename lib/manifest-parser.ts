@@ -20,9 +20,15 @@ export function getDependenciesFrom(
   manifestFileContents: string,
   includeDevDependencies: boolean,
 ): Dependency[] {
-  const manifest = toml.parse(
-    manifestFileContents,
-  ) as unknown as PoetryManifestType;
+  let manifest: PoetryManifestType;
+  try {
+    manifest = toml.parse(
+      manifestFileContents,
+    ) as unknown as PoetryManifestType;
+  } catch {
+    throw new ManifestFileNotValid();
+  }
+
   if (!manifest.tool?.poetry) {
     throw new ManifestFileNotValid();
   }

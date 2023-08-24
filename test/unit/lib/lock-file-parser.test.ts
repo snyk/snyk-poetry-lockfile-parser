@@ -4,6 +4,11 @@ import {
 } from '../../../lib/lock-file-parser';
 
 describe('when loading lockfile', () => {
+  it('should throw LockFileNotValid if toml parsing throws an error', () => {
+    const fileContents = `[[package]
+      category = 'main"`;
+    expect(() => packageSpecsFrom(fileContents)).toThrow(LockFileNotValid);
+  });
   it('should throw exception if package stanza not found', () => {
     expect(() => packageSpecsFrom('')).toThrow(LockFileNotValid);
   });
