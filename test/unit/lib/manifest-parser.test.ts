@@ -6,6 +6,10 @@ import {
 
 describe('when loading manifest files', () => {
   describe('pkgInfoFrom', () => {
+    it('should throw ManifestFileNotValid if toml parsing throws an error', () => {
+      const fileContents = `[[tool]`;
+      expect(() => pkgInfoFrom(fileContents)).toThrow(ManifestFileNotValid);
+    });
     it('should return package info given the contents of a manifest', () => {
       const fileContents = `[tool.poetry]
         name = "poetry-fixtures-project"

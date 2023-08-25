@@ -3,7 +3,12 @@ import * as toml from '@iarna/toml';
 export function packageSpecsFrom(
   lockFileContents: string,
 ): PoetryLockFileDependency[] {
-  const lockFile = toml.parse(lockFileContents) as unknown as PoetryLockFile;
+  let lockFile: PoetryLockFile;
+  try {
+    lockFile = toml.parse(lockFileContents) as unknown as PoetryLockFile;
+  } catch {
+    throw new LockFileNotValid();
+  }
 
   if (!lockFile.package) {
     throw new LockFileNotValid();
