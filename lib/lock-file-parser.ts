@@ -1,4 +1,5 @@
 import * as toml from '@iarna/toml';
+import { OpenSourceEcosystems } from '@snyk/error-catalog-nodejs-public';
 
 export function packageSpecsFrom(
   lockFileContents: string,
@@ -7,11 +8,15 @@ export function packageSpecsFrom(
   try {
     lockFile = toml.parse(lockFileContents) as unknown as PoetryLockFile;
   } catch {
-    throw new LockFileNotValid();
+    throw new OpenSourceEcosystems.UnparseableLockFileError(
+      'The poetry.lock file is not parsable.',
+    );
   }
 
   if (!lockFile.package) {
-    throw new LockFileNotValid();
+    throw new OpenSourceEcosystems.UnparseableLockFileError(
+      'The poetry.lock file contains no package stanza.',
+    );
   }
 
   return lockFile.package.map((pkg) => {
@@ -37,11 +42,4 @@ export interface PoetryLockFileDependency {
   name: string;
   version: string;
   dependencies: string[];
-}
-
-export class LockFileNotValid extends Error {
-  constructor() {
-    super("The poetry.lock file contains no package stanza'");
-    this.name = 'LockFileNotValid';
-  }
 }

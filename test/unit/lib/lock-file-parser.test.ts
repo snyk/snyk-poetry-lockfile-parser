@@ -1,16 +1,18 @@
-import {
-  packageSpecsFrom,
-  LockFileNotValid,
-} from '../../../lib/lock-file-parser';
+import { packageSpecsFrom } from '../../../lib/lock-file-parser';
+import { OpenSourceEcosystems } from '@snyk/error-catalog-nodejs-public';
 
 describe('when loading lockfile', () => {
   it('should throw LockFileNotValid if toml parsing throws an error', () => {
     const fileContents = `[[package]
       category = 'main"`;
-    expect(() => packageSpecsFrom(fileContents)).toThrow(LockFileNotValid);
+    expect(() => packageSpecsFrom(fileContents)).toThrow(
+      OpenSourceEcosystems.UnparseableLockFileError,
+    );
   });
   it('should throw exception if package stanza not found', () => {
-    expect(() => packageSpecsFrom('')).toThrow(LockFileNotValid);
+    expect(() => packageSpecsFrom('')).toThrow(
+      OpenSourceEcosystems.UnparseableLockFileError,
+    );
   });
 
   it('should parse a lockfile and return a list of its packages and their dependency names', () => {
