@@ -1,5 +1,8 @@
 version: 2.1
 
+orbs:
+  prodsec: snyk/prodsec-orb@1.0
+
 executors:
   docker-node:
     parameters:
@@ -84,6 +87,15 @@ workflows:
 
   test:
     jobs:
+      - prodsec/secrets-scan:
+          name: Scan repository for secrets
+          context:
+            - snyk-bot-slack
+          channel: os-team-managed-alerts
+          filters:
+            branches:
+              ignore:
+                - master
       - lint:
           filters:
             branches:
