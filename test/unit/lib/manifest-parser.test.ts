@@ -1,14 +1,13 @@
-import {
-  getDependenciesFrom,
-  ManifestFileNotValid,
-  pkgInfoFrom,
-} from '../../../lib/manifest-parser';
+import { getDependenciesFrom, pkgInfoFrom } from '../../../lib/manifest-parser';
+import { OpenSourceEcosystems } from '@snyk/error-catalog-nodejs-public';
 
 describe('when loading manifest files', () => {
   describe('pkgInfoFrom', () => {
     it('should throw ManifestFileNotValid if toml parsing throws an error', () => {
       const fileContents = `[[tool]`;
-      expect(() => pkgInfoFrom(fileContents)).toThrow(ManifestFileNotValid);
+      expect(() => pkgInfoFrom(fileContents)).toThrow(
+        OpenSourceEcosystems.UnparseableManifestError,
+      );
     });
     it('should return package info given the contents of a manifest', () => {
       const fileContents = `[tool.poetry]
@@ -27,14 +26,16 @@ describe('when loading manifest files', () => {
       const errorResult = () => {
         pkgInfoFrom(fileContents);
       };
-      expect(errorResult).toThrow(ManifestFileNotValid);
+      expect(errorResult).toThrow(
+        OpenSourceEcosystems.UnparseableManifestError,
+      );
     });
   });
 
   describe('getDependenciesFrom', () => {
     it('should throw exception if tools.poetry stanza not found', () => {
       expect(() => getDependenciesFrom('', false)).toThrow(
-        ManifestFileNotValid,
+        OpenSourceEcosystems.UnparseableManifestError,
       );
     });
 
