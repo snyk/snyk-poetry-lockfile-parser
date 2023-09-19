@@ -1,5 +1,6 @@
 import * as toml from '@iarna/toml';
 import { PkgInfo } from '@snyk/dep-graph';
+import { OpenSourceEcosystems } from '@snyk/error-catalog-nodejs-public';
 
 export function pkgInfoFrom(manifestFileContents: string): PkgInfo {
   let manifest: PoetryManifestType;
@@ -11,8 +12,11 @@ export function pkgInfoFrom(manifestFileContents: string): PkgInfo {
       name: manifest.tool.poetry.name,
       version: manifest.tool.poetry.version,
     };
-  } catch {
-    throw new ManifestFileNotValid();
+  } catch (error) {
+    throw new OpenSourceEcosystems.UnparseableManifestError(
+      'The pyproject.toml file is not parsable.',
+      { error },
+    );
   }
 }
 
@@ -25,12 +29,17 @@ export function getDependenciesFrom(
     manifest = toml.parse(
       manifestFileContents,
     ) as unknown as PoetryManifestType;
-  } catch {
-    throw new ManifestFileNotValid();
+  } catch (error) {
+    throw new OpenSourceEcosystems.UnparseableManifestError(
+      'The pyproject.toml file is not parsable.',
+      { error },
+    );
   }
 
   if (!manifest.tool?.poetry) {
-    throw new ManifestFileNotValid();
+    throw new OpenSourceEcosystems.UnparseableManifestError(
+      'The pyproject.toml is not a valid poetry file.',
+    );
   }
 
   const dependencies: Dependency[] = dependenciesFrom(manifest).map((dep) => ({
@@ -79,13 +88,6 @@ function devDependenciesFrom(manifest: PoetryManifestType): string[] {
 
 function dependenciesFrom(manifest: PoetryManifestType): string[] {
   return Object.keys(manifest.tool.poetry.dependencies || []);
-}
-
-export class ManifestFileNotValid extends Error {
-  constructor() {
-    super('pyproject.toml is not a valid poetry file.');
-    this.name = 'ManifestFileNotValid';
-  }
 }
 
 interface PoetryManifestType {
