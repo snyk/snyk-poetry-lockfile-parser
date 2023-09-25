@@ -1,0 +1,11 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: snyk-poetry-lockfile-parser
+  annotations:
+    github.com/project-slug: snyk/snyk-poetry-lockfile-parser
+    github.com/team-slug: snyk/os-managed
+spec:
+  type: external-library
+  lifecycle: "-"
+  owner: os-managed
