@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  prodsec: snyk/prodsec-orb@1.0
+  prodsec: snyk/prodsec-orb@1
 
 executors:
   docker-node:
@@ -40,6 +40,19 @@ commands:
           command: npm run lint
 
 jobs:
+  security-scans:
+    resource_class: small
+    docker:
+      - image: cimg/node:lts
+    steps:
+      - checkout
+      - install
+      - prodsec/security_scans:
+          mode: auto
+          release-branch: master
+          open-source-additional-arguments: --exclude=test
+          iac-scan: disabled
+
   test:
     resource_class: small
     parameters:
@@ -60,7 +73,7 @@ jobs:
             - test
       - when:
           condition:
-            not: 
+            not:
               equal: ["8.17.0", << parameters.version >>]
           steps:
             - test-coverage
@@ -96,6 +109,15 @@ workflows:
             branches:
               ignore:
                 - master
+
+      - security-scans:
+          name: Security Scans
+          context: open_source-managed
+          filters:
+            branches:
+              ignore:
+                - master
+
       - lint:
           filters:
             branches:
@@ -117,6 +139,14 @@ workflows:
                 - master
   release:
     jobs:
+      - security-scans:
+          name: Security Scans
+          context: open_source-managed
+          filters:
+            branches:
+              only:
+                - master
+
       - release:
           context: nodejs-lib-release
           filters:
