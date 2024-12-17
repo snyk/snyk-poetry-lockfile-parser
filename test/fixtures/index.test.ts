@@ -45,7 +45,7 @@ describe('buildDepGraph', () => {
       })
       .connectDep(depGraphBuilder.rootNodeId, 'jinja2')
       .addPkgNode({ name: 'markupsafe', version: '1.1.1' }, 'markupsafe', {
-        labels: { scope: 'prod' },
+        labels: { scope: 'prod', pkgIdProvenance: 'MarkupSafe' },
       })
       .connectDep('jinja2', 'markupsafe')
       .build();
@@ -68,7 +68,7 @@ describe('buildDepGraph', () => {
         })
         .connectDep(depGraphBuilder.rootNodeId, 'six')
         .addPkgNode({ name: 'isodd', version: '0.1.2' }, 'isodd', {
-          labels: { scope: 'dev' },
+          labels: { scope: 'dev', pkgIdProvenance: 'isOdd' },
         })
         .connectDep(depGraphBuilder.rootNodeId, 'isodd')
         .build();
@@ -108,7 +108,7 @@ describe('buildDepGraph', () => {
         })
         .connectDep(depGraphBuilder.rootNodeId, 'six')
         .addPkgNode({ name: 'isodd', version: '0.1.2' }, 'isodd', {
-          labels: { scope: 'dev' },
+          labels: { scope: 'dev', pkgIdProvenance: 'isOdd' },
         })
         .connectDep(depGraphBuilder.rootNodeId, 'isodd')
         .build();
@@ -148,7 +148,7 @@ describe('buildDepGraph', () => {
         })
         .connectDep(depGraphBuilder.rootNodeId, 'six')
         .addPkgNode({ name: 'isodd', version: '0.1.2' }, 'isodd', {
-          labels: { scope: 'dev' },
+          labels: { scope: 'dev', pkgIdProvenance: 'isOdd' },
         })
         .connectDep(depGraphBuilder.rootNodeId, 'isodd')
         .addPkgNode({ name: 'simple-enum', version: '0.0.6' }, 'simple-enum', {
@@ -192,7 +192,7 @@ describe('buildDepGraph', () => {
         })
         .connectDep(depGraphBuilder.rootNodeId, 'six')
         .addPkgNode({ name: 'isodd', version: '0.1.2' }, 'isodd', {
-          labels: { scope: 'dev' },
+          labels: { scope: 'dev', pkgIdProvenance: 'isOdd' },
         })
         .connectDep(depGraphBuilder.rootNodeId, 'isodd')
         .addPkgNode({ name: 'simple-enum', version: '0.0.6' }, 'simple-enum', {
@@ -200,7 +200,7 @@ describe('buildDepGraph', () => {
         })
         .connectDep(depGraphBuilder.rootNodeId, 'simple-enum')
         .addPkgNode({ name: 'whattype', version: '0.0.1' }, 'whattype', {
-          labels: { scope: 'dev' },
+          labels: { scope: 'dev', pkgIdProvenance: 'whatType' },
         })
         .connectDep(depGraphBuilder.rootNodeId, 'whattype')
         .build();
