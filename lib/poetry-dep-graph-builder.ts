@@ -12,6 +12,12 @@ const IGNORED_DEPENDENCIES: string[] = [
   'wheel',
 ];
 
+export interface Labels {
+  [key: string]: string | undefined;
+  scope?: 'dev' | 'prod';
+  pruned?: 'cyclic' | 'true';
+}
+
 export function build(
   pkgDetails: PkgInfo,
   dependencies: Dependency[],
@@ -53,9 +59,15 @@ function addDependenciesForPkg(
   }
 
   const pkgInfo: PkgInfo = { name: pkg.name, version: pkg.version };
+  const labels: Labels = {
+    scope: dependency.isDev ? 'dev' : 'prod',
+  };
+  if (pkg.name != pkgName) {
+    labels.pkgIdProvenance = pkgName;
+  }
   builder
     .addPkgNode(pkgInfo, pkg.name, {
-      labels: { scope: dependency.isDev ? 'dev' : 'prod' },
+      labels,
     })
     .connectDep(parentNodeId, pkg.name);
   addDependenciesToGraph(
