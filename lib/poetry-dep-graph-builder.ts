@@ -63,7 +63,7 @@ function addDependenciesForPkg(
     scope: dependency.isDev ? 'dev' : 'prod',
   };
   if (pkg.name != pkgName) {
-    labels.pkgIdProvenance = pkgName;
+    labels.pkgIdProvenance = `${pkgName}@${pkg.version}`;
   }
   builder
     .addPkgNode(pkgInfo, pkg.name, {
