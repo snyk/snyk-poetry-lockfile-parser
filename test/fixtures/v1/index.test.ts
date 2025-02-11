@@ -1,5 +1,5 @@
-import { readFixture } from './utils';
-import { buildDepGraph } from '../../lib';
+import { readFixture } from '../utils';
+import { buildDepGraph } from '../../../lib';
 import { DepGraphBuilder } from '@snyk/dep-graph';
 
 describe('buildDepGraph', () => {
@@ -33,25 +33,6 @@ describe('buildDepGraph', () => {
 
     expect(
       depGraphForScenarioAt('scenarios/one-dep-no-transitives').equals(
-        expectedGraph,
-      ),
-    ).toBe(true);
-  });
-
-  it('on fixture oneDepWithTransitive yields graph with the two packages', () => {
-    const expectedGraph = depGraphBuilder
-      .addPkgNode({ name: 'jinja2', version: '2.11.2' }, 'jinja2', {
-        labels: { scope: 'prod' },
-      })
-      .connectDep(depGraphBuilder.rootNodeId, 'jinja2')
-      .addPkgNode({ name: 'markupsafe', version: '1.1.1' }, 'markupsafe', {
-        labels: { scope: 'prod', pkgIdProvenance: 'MarkupSafe@1.1.1' },
-      })
-      .connectDep('jinja2', 'markupsafe')
-      .build();
-
-    expect(
-      depGraphForScenarioAt('scenarios/one-dep-with-transitive').equals(
         expectedGraph,
       ),
     ).toBe(true);
@@ -256,7 +237,10 @@ function depGraphForScenarioAt(
   scenarioPath: string,
   includeDevDependencies = false,
 ) {
-  const { manifestFileContents, lockFileContents } = readFixture(scenarioPath);
+  const { manifestFileContents, lockFileContents } = readFixture(
+    __dirname,
+    scenarioPath,
+  );
   return buildDepGraph(
     manifestFileContents,
     lockFileContents,

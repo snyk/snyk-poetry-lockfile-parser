@@ -1,6 +1,6 @@
 import { DepGraph, DepGraphBuilder, PkgInfo } from '@snyk/dep-graph';
 import { PoetryLockFileDependency } from './lock-file-parser';
-import { Dependency } from './manifest-parser';
+import { Dependency } from './parsers/types';
 
 // Poetry uses the virtualenv to create an environment and this comes with these
 // packages pre-installed, therefore they won't be part of the lockfile.
