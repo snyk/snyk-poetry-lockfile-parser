@@ -91,6 +91,7 @@ jobs:
     resource_class: small
     executor:
       name: docker-node
+      version: "current"
     steps:
       - checkout
       - install
