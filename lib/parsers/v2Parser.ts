@@ -19,8 +19,8 @@ export class V2Parser implements Parser {
   }
 
   dependenciesFrom(): string[] {
-    const newFormatDeps =
-      this.manifest.project.dependencies.map((dep) => dep.split(' ')[0]) || [];
+    const deps = this.manifest.project.dependencies || [];
+    const newFormatDeps = deps.map((dep) => dep.split(' ')[0]) || [];
     const legacyFormatDeps = Object.keys(
       this.manifest.tool?.poetry?.dependencies || [],
     );
