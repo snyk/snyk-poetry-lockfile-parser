@@ -54,7 +54,7 @@ jobs:
           iac-scan: disabled
 
   test:
-    resource_class: small
+    resource_class: medium
     parameters:
       version:
         default: "lts"
@@ -91,6 +91,7 @@ jobs:
     resource_class: small
     executor:
       name: docker-node
+      version: "current"
     steps:
       - checkout
       - install
@@ -129,10 +130,9 @@ workflows:
           matrix:
             parameters:
               version:
-                - 8.17.0
-                - 10.22.1
-                - 12.18.4
-                - 14.13.0
+                - 18.20.6
+                - 20.18.3
+                - 22.14.0
           filters:
             branches:
               ignore:
