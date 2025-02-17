@@ -54,7 +54,7 @@ jobs:
           iac-scan: disabled
 
   test:
-    resource_class: small
+    resource_class: medium
     parameters:
       version:
         default: "lts"
