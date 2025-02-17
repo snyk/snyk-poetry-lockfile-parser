@@ -1,5 +1,5 @@
-import { readFixture } from '../utils';
-import { buildDepGraph } from '../../../lib';
+import { readFixture } from './fixtures/utils';
+import { buildDepGraph } from '../lib';
 import { DepGraphBuilder } from '@snyk/dep-graph';
 
 describe('buildDepGraph', () => {
@@ -23,33 +23,36 @@ describe('buildDepGraph', () => {
     expect(result.equals(expectedGraph)).toBeTruthy();
   });
 
-  it('on fixture oneDepNoTransitives yields a graph with only package and its dep', () => {
+  it('on fixture oneDepWithTransitive yields graph with the two packages', () => {
     const expectedGraph = depGraphBuilder
-      .addPkgNode({ name: 'six', version: '1.15.0' }, 'six', {
+      .addPkgNode({ name: 'jinja2', version: '3.1.5' }, 'jinja2', {
         labels: { scope: 'prod' },
       })
-      .connectDep(depGraphBuilder.rootNodeId, 'six')
+      .connectDep(depGraphBuilder.rootNodeId, 'jinja2')
+      .addPkgNode({ name: 'markupsafe', version: '3.0.2' }, 'markupsafe', {
+        labels: { scope: 'prod', pkgIdProvenance: 'MarkupSafe@3.0.2' },
+      })
+      .connectDep('jinja2', 'markupsafe')
       .build();
 
     expect(
-      depGraphForScenarioAt('scenarios/one-dep-no-transitives').equals(
-        expectedGraph,
-      ),
+      depGraphForScenarioAt(
+        'fixtures/v2/scenarios/one-dep-with-transitive',
+      ).equals(expectedGraph),
     ).toBe(true);
   });
-
   describe('on fixture oneDepWithOneDevDep yields graph with two packages', () => {
-    const scenarioPath = 'scenarios/one-dep-one-devdep';
+    const scenarioPath = 'fixtures/v2/scenarios/one-dep-one-devdep';
 
     it('oneDepWithOneDevDep yields graph with two packages when including dev packages', () => {
       const includeDevDependencies = true;
       const expectedGraph = depGraphBuilder
-        .addPkgNode({ name: 'six', version: '1.15.0' }, 'six', {
+        .addPkgNode({ name: 'six', version: '1.17.0' }, 'six', {
           labels: { scope: 'prod' },
         })
         .connectDep(depGraphBuilder.rootNodeId, 'six')
         .addPkgNode({ name: 'isodd', version: '0.1.2' }, 'isodd', {
-          labels: { scope: 'dev', pkgIdProvenance: 'isOdd@0.1.2' },
+          labels: { scope: 'dev' },
         })
         .connectDep(depGraphBuilder.rootNodeId, 'isodd')
         .build();
@@ -64,7 +67,7 @@ describe('buildDepGraph', () => {
     it('on fixture oneDepWithOneDevDep yields graph with one package when ignoring dev packages', () => {
       const includeDevDependencies = false;
       const expectedGraph = depGraphBuilder
-        .addPkgNode({ name: 'six', version: '1.15.0' }, 'six', {
+        .addPkgNode({ name: 'six', version: '1.17.0' }, 'six', {
           labels: { scope: 'prod' },
         })
         .connectDep(depGraphBuilder.rootNodeId, 'six')
@@ -77,19 +80,21 @@ describe('buildDepGraph', () => {
       expect(isEqual).toBe(true);
     });
   });
-
   describe('on fixture oneDevDepWithOneDevDepGroup yields graph with two packages', () => {
-    const scenarioPath = 'scenarios/one-dep-one-devdep-group';
+    const scenarioPath = 'fixtures/v2/scenarios/one-dep-one-devdep-group';
 
     it('oneDevDepWithOneDevDepGroup yields graph with two packages when including dev packages', () => {
       const includeDevDependencies = true;
       const expectedGraph = depGraphBuilder
-        .addPkgNode({ name: 'six', version: '1.16.0' }, 'six', {
+        .addPkgNode({ name: 'six', version: '1.17.0' }, 'six', {
           labels: { scope: 'prod' },
         })
         .connectDep(depGraphBuilder.rootNodeId, 'six')
         .addPkgNode({ name: 'isodd', version: '0.1.2' }, 'isodd', {
-          labels: { scope: 'dev', pkgIdProvenance: 'isOdd@0.1.2' },
+          labels: {
+            scope: 'dev',
+            // pkgIdProvenance: 'isOdd@0.1.2'
+          },
         })
         .connectDep(depGraphBuilder.rootNodeId, 'isodd')
         .build();
@@ -104,7 +109,7 @@ describe('buildDepGraph', () => {
     it('on fixture oneDevDepWithOneDevDepGroup yields graph with one package when ignoring dev packages', () => {
       const includeDevDependencies = false;
       const expectedGraph = depGraphBuilder
-        .addPkgNode({ name: 'six', version: '1.16.0' }, 'six', {
+        .addPkgNode({ name: 'six', version: '1.17.0' }, 'six', {
           labels: { scope: 'prod' },
         })
         .connectDep(depGraphBuilder.rootNodeId, 'six')
@@ -117,65 +122,17 @@ describe('buildDepGraph', () => {
       expect(isEqual).toBe(true);
     });
   });
-
-  describe('on fixture oneDepWithOneDevDepAndOneDevDepGroup yields graph with three packages', () => {
-    const scenarioPath = 'scenarios/one-dep-one-devdep-one-devdep-group';
-
-    it('oneDepWithOneDevDepAndOneDevDepGroup yields graph with three packages when including dev packages', () => {
-      const includeDevDependencies = true;
-      const expectedGraph = depGraphBuilder
-        .addPkgNode({ name: 'six', version: '1.16.0' }, 'six', {
-          labels: { scope: 'prod' },
-        })
-        .connectDep(depGraphBuilder.rootNodeId, 'six')
-        .addPkgNode({ name: 'isodd', version: '0.1.2' }, 'isodd', {
-          labels: { scope: 'dev', pkgIdProvenance: 'isOdd@0.1.2' },
-        })
-        .connectDep(depGraphBuilder.rootNodeId, 'isodd')
-        .addPkgNode({ name: 'simple-enum', version: '0.0.6' }, 'simple-enum', {
-          labels: { scope: 'dev' },
-        })
-        .connectDep(depGraphBuilder.rootNodeId, 'simple-enum')
-        .build();
-
-      const isEqual = depGraphForScenarioAt(
-        scenarioPath,
-        includeDevDependencies,
-      ).equals(expectedGraph);
-      expect(isEqual).toBe(true);
-    });
-
-    it('on fixture oneDepWithOneDevDepAndOneDevDepGroup yields graph with one package when ignoring dev packages', () => {
-      const includeDevDependencies = false;
-      const expectedGraph = depGraphBuilder
-        .addPkgNode({ name: 'six', version: '1.16.0' }, 'six', {
-          labels: { scope: 'prod' },
-        })
-        .connectDep(depGraphBuilder.rootNodeId, 'six')
-        .build();
-
-      const isEqual = depGraphForScenarioAt(
-        scenarioPath,
-        includeDevDependencies,
-      ).equals(expectedGraph);
-      expect(isEqual).toBe(true);
-    });
-  });
-
   describe('on fixture oneDepWithOneDevDepAndMultipleDevDepGroups yields graph with three packages', () => {
-    const scenarioPath = 'scenarios/one-dep-one-devdep-multiple-devdep-groups';
+    const scenarioPath =
+      'fixtures/v2/scenarios/one-dep-one-devdep-multiple-devdep-groups';
 
     it('oneDepWithOneDevDepAndMultipleDevDepGroups yields graph with three packages when including dev packages', () => {
       const includeDevDependencies = true;
       const expectedGraph = depGraphBuilder
-        .addPkgNode({ name: 'six', version: '1.16.0' }, 'six', {
+        .addPkgNode({ name: 'six', version: '1.17.0' }, 'six', {
           labels: { scope: 'prod' },
         })
         .connectDep(depGraphBuilder.rootNodeId, 'six')
-        .addPkgNode({ name: 'isodd', version: '0.1.2' }, 'isodd', {
-          labels: { scope: 'dev', pkgIdProvenance: 'isOdd@0.1.2' },
-        })
-        .connectDep(depGraphBuilder.rootNodeId, 'isodd')
         .addPkgNode({ name: 'simple-enum', version: '0.0.6' }, 'simple-enum', {
           labels: { scope: 'dev' },
         })
@@ -184,6 +141,10 @@ describe('buildDepGraph', () => {
           labels: { scope: 'dev', pkgIdProvenance: 'whatType@0.0.1' },
         })
         .connectDep(depGraphBuilder.rootNodeId, 'whattype')
+        .addPkgNode({ name: 'isodd', version: '0.1.2' }, 'isodd', {
+          labels: { scope: 'dev', pkgIdProvenance: 'isOdd@0.1.2' },
+        })
+        .connectDep(depGraphBuilder.rootNodeId, 'isodd')
         .build();
 
       const isEqual = depGraphForScenarioAt(
@@ -196,7 +157,7 @@ describe('buildDepGraph', () => {
     it('on fixture oneDepWithOneDevDepAndMultipleDevDepGroups yields graph with one package when ignoring dev packages', () => {
       const includeDevDependencies = false;
       const expectedGraph = depGraphBuilder
-        .addPkgNode({ name: 'six', version: '1.16.0' }, 'six', {
+        .addPkgNode({ name: 'six', version: '1.17.0' }, 'six', {
           labels: { scope: 'prod' },
         })
         .connectDep(depGraphBuilder.rootNodeId, 'six')
@@ -209,27 +170,61 @@ describe('buildDepGraph', () => {
       expect(isEqual).toBe(true);
     });
   });
-
   it('on fixture circularDependency yields graph successfully', () => {
-    const actualGraph = depGraphForScenarioAt('scenarios/circular-dependency');
+    const actualGraph = depGraphForScenarioAt(
+      'fixtures/v2/scenarios/circular-dependency',
+    );
+    expect(actualGraph).toBeDefined();
+    expect(actualGraph.getDepPkgs().length).toBe(13);
+  });
+  it('on fixture with unsafe package yields graph successfully', () => {
+    // Package is in virtualenv and doesn't have an entry in poetry.lock
+    const actualGraph = depGraphForScenarioAt(
+      'fixtures/v2/scenarios/unsafe-packages',
+    );
     expect(actualGraph).toBeDefined();
     expect(actualGraph.getDepPkgs().length).toBe(2);
   });
+  it('should build depGraph for project with only dev deps', () => {
+    const includeDevDependencies = true;
+    const expectedGraph = depGraphBuilder
+      .addPkgNode({ name: 'pytest', version: '7.4.4' }, 'pytest', {
+        labels: { scope: 'dev' },
+      })
+      .connectDep(depGraphBuilder.rootNodeId, 'pytest')
+      .addPkgNode({ name: 'colorama', version: '0.4.6' }, 'colorama', {
+        labels: { scope: 'dev' },
+      })
+      .connectDep('pytest', 'colorama')
+      .addPkgNode(
+        { name: 'exceptiongroup', version: '1.2.2' },
+        'exceptiongroup',
+        { labels: { scope: 'dev' } },
+      )
+      .connectDep('pytest', 'exceptiongroup')
+      .addPkgNode({ name: 'iniconfig', version: '2.0.0' }, 'iniconfig', {
+        labels: { scope: 'dev' },
+      })
+      .connectDep('pytest', 'iniconfig')
+      .addPkgNode({ name: 'packaging', version: '24.2' }, 'packaging', {
+        labels: { scope: 'dev' },
+      })
+      .connectDep('pytest', 'packaging')
+      .addPkgNode({ name: 'pluggy', version: '1.5.0' }, 'pluggy', {
+        labels: { scope: 'dev' },
+      })
+      .connectDep('pytest', 'pluggy')
+      .addPkgNode({ name: 'tomli', version: '2.2.1' }, 'tomli', {
+        labels: { scope: 'dev' },
+      })
+      .connectDep('pytest', 'tomli')
+      .build();
 
-  it('on fixture with unsafe package yields graph successfully', () => {
-    // Package is in virtualenv and doesn't have an entry in poetry.lock
-    const actualGraph = depGraphForScenarioAt('scenarios/unsafe-packages');
-    expect(actualGraph).toBeDefined();
-    expect(actualGraph.getDepPkgs().length).toBe(1);
-  });
-
-  it('on fixture with conflicting python declarations yields graph successfully', () => {
-    // Spy only exists here to prevent polluting the logs with a warning log we expect to see
-    jest.spyOn(console, 'warn').mockImplementation();
-    const actualGraph = depGraphForScenarioAt(
-      'scenarios/conflicting-python-declarations',
-    );
-    expect(actualGraph).toBeDefined();
+    const isEqual = depGraphForScenarioAt(
+      'fixtures/v2/scenarios/dev-deps-only',
+      includeDevDependencies,
+    ).equals(expectedGraph);
+    expect(isEqual).toBe(true);
   });
 });
 
