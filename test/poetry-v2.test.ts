@@ -1,5 +1,5 @@
-import { readFixture } from '../utils';
-import { buildDepGraph } from '../../../lib';
+import { readFixture } from './fixtures/utils';
+import { buildDepGraph } from '../lib';
 import { DepGraphBuilder } from '@snyk/dep-graph';
 
 describe('buildDepGraph', () => {
@@ -36,13 +36,13 @@ describe('buildDepGraph', () => {
       .build();
 
     expect(
-      depGraphForScenarioAt('scenarios/one-dep-with-transitive').equals(
-        expectedGraph,
-      ),
+      depGraphForScenarioAt(
+        'fixtures/v2/scenarios/one-dep-with-transitive',
+      ).equals(expectedGraph),
     ).toBe(true);
   });
   describe('on fixture oneDepWithOneDevDep yields graph with two packages', () => {
-    const scenarioPath = 'scenarios/one-dep-one-devdep';
+    const scenarioPath = 'fixtures/v2/scenarios/one-dep-one-devdep';
 
     it('oneDepWithOneDevDep yields graph with two packages when including dev packages', () => {
       const includeDevDependencies = true;
@@ -81,7 +81,7 @@ describe('buildDepGraph', () => {
     });
   });
   describe('on fixture oneDevDepWithOneDevDepGroup yields graph with two packages', () => {
-    const scenarioPath = 'scenarios/one-dep-one-devdep-group';
+    const scenarioPath = 'fixtures/v2/scenarios/one-dep-one-devdep-group';
 
     it('oneDevDepWithOneDevDepGroup yields graph with two packages when including dev packages', () => {
       const includeDevDependencies = true;
@@ -123,7 +123,8 @@ describe('buildDepGraph', () => {
     });
   });
   describe('on fixture oneDepWithOneDevDepAndMultipleDevDepGroups yields graph with three packages', () => {
-    const scenarioPath = 'scenarios/one-dep-one-devdep-multiple-devdep-groups';
+    const scenarioPath =
+      'fixtures/v2/scenarios/one-dep-one-devdep-multiple-devdep-groups';
 
     it('oneDepWithOneDevDepAndMultipleDevDepGroups yields graph with three packages when including dev packages', () => {
       const includeDevDependencies = true;
@@ -170,15 +171,60 @@ describe('buildDepGraph', () => {
     });
   });
   it('on fixture circularDependency yields graph successfully', () => {
-    const actualGraph = depGraphForScenarioAt('scenarios/circular-dependency');
+    const actualGraph = depGraphForScenarioAt(
+      'fixtures/v2/scenarios/circular-dependency',
+    );
     expect(actualGraph).toBeDefined();
     expect(actualGraph.getDepPkgs().length).toBe(13);
   });
   it('on fixture with unsafe package yields graph successfully', () => {
     // Package is in virtualenv and doesn't have an entry in poetry.lock
-    const actualGraph = depGraphForScenarioAt('scenarios/unsafe-packages');
+    const actualGraph = depGraphForScenarioAt(
+      'fixtures/v2/scenarios/unsafe-packages',
+    );
     expect(actualGraph).toBeDefined();
     expect(actualGraph.getDepPkgs().length).toBe(2);
+  });
+  it('should build depGraph for project with only dev deps', () => {
+    const includeDevDependencies = true;
+    const expectedGraph = depGraphBuilder
+      .addPkgNode({ name: 'pytest', version: '7.4.4' }, 'pytest', {
+        labels: { scope: 'dev' },
+      })
+      .connectDep(depGraphBuilder.rootNodeId, 'pytest')
+      .addPkgNode({ name: 'colorama', version: '0.4.6' }, 'colorama', {
+        labels: { scope: 'dev' },
+      })
+      .connectDep('pytest', 'colorama')
+      .addPkgNode(
+        { name: 'exceptiongroup', version: '1.2.2' },
+        'exceptiongroup',
+        { labels: { scope: 'dev' } },
+      )
+      .connectDep('pytest', 'exceptiongroup')
+      .addPkgNode({ name: 'iniconfig', version: '2.0.0' }, 'iniconfig', {
+        labels: { scope: 'dev' },
+      })
+      .connectDep('pytest', 'iniconfig')
+      .addPkgNode({ name: 'packaging', version: '24.2' }, 'packaging', {
+        labels: { scope: 'dev' },
+      })
+      .connectDep('pytest', 'packaging')
+      .addPkgNode({ name: 'pluggy', version: '1.5.0' }, 'pluggy', {
+        labels: { scope: 'dev' },
+      })
+      .connectDep('pytest', 'pluggy')
+      .addPkgNode({ name: 'tomli', version: '2.2.1' }, 'tomli', {
+        labels: { scope: 'dev' },
+      })
+      .connectDep('pytest', 'tomli')
+      .build();
+
+    const isEqual = depGraphForScenarioAt(
+      'fixtures/v2/scenarios/dev-deps-only',
+      includeDevDependencies,
+    ).equals(expectedGraph);
+    expect(isEqual).toBe(true);
   });
 });
 

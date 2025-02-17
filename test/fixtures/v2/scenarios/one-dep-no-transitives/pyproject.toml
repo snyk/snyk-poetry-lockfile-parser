@@ -3,7 +3,7 @@ name = "myPkg"
 version = "0.1.0"
 description = ""
 authors = [
-    {name = "Damilola Olufemi",email = "dami.olufemi@snyk.io"}
+    {name = "Your Name",email = "you@example.com"}
 ]
 readme = "README.md"
 requires-python = ">=3.13"

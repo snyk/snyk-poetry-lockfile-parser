@@ -6,16 +6,11 @@ authors = [
     {name = "Your Name",email = "you@example.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.13"
-dependencies = [
-    "six (>=1.17.0,<2.0.0)"
-]
-
+requires-python = ">=3.9"
 
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
+requires = ["poetry-core>=3.6"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.group.dev.dependencies]
-isodd = "^0.1.2"
-
+pytest = "^7.2.0"
