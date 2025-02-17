@@ -1,3 +1,4 @@
+import { defaults } from 'lodash';
 import { DepGraph, DepGraphBuilder, PkgInfo } from '@snyk/dep-graph';
 import { PoetryLockFileDependency } from './lock-file-parser';
 import { Dependency } from './parsers/types';
@@ -12,6 +13,11 @@ const IGNORED_DEPENDENCIES: string[] = [
   'wheel',
 ];
 
+const DEFAULT_ROOT_PKG = {
+  name: '_root',
+  version: '0.0.0',
+};
+
 export interface Labels {
   [key: string]: string | undefined;
   scope?: 'dev' | 'prod';
@@ -23,7 +29,8 @@ export function build(
   dependencies: Dependency[],
   pkgSpecs: PoetryLockFileDependency[],
 ): DepGraph {
-  const builder = new DepGraphBuilder({ name: 'poetry' }, pkgDetails);
+  const rootPkg = defaults({}, pkgDetails, DEFAULT_ROOT_PKG);
+  const builder = new DepGraphBuilder({ name: 'poetry' }, rootPkg);
   addDependenciesToGraph(dependencies, pkgSpecs, builder.rootNodeId, builder);
   return builder.build();
 }

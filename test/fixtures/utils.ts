@@ -17,3 +17,9 @@ export function readFixture(root: string, folderName: string): Fixture {
     ),
   };
 }
+
+export function readExpected(root: string, folderName: string) {
+  return JSON.parse(
+    fs.readFileSync(`${root}/${folderName}/expected.json`, 'utf8'),
+  );
+}

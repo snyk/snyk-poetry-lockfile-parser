@@ -1,4 +1,4 @@
-import { readFixture } from './fixtures/utils';
+import { readExpected, readFixture } from './fixtures/utils';
 import { buildDepGraph } from '../lib';
 import { DepGraphBuilder } from '@snyk/dep-graph';
 
@@ -12,6 +12,14 @@ describe('buildDepGraph', () => {
     );
   });
 
+  it('should build a dep-graph with default named root node named', () => {
+    const scenarioPath = 'fixtures/v1/scenarios/package-mode-false';
+
+    const expectedDepGraphJson = readExpected(__dirname, scenarioPath);
+    const depGraph = depGraphForScenarioAt(scenarioPath, true);
+
+    expect(depGraph.toJSON()).toEqual(expectedDepGraphJson);
+  });
   it('should build a dep-graph with root node named and versioned as per project info in manifest file.', () => {
     const expectedGraph = depGraphBuilder.build();
     const manifestContents = `[tool.poetry]
