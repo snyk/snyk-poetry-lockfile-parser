@@ -41,6 +41,75 @@ describe('buildDepGraph', () => {
       ).equals(expectedGraph),
     ).toBe(true);
   });
+
+  it('on fixture oneOptionalDep yields graph', () => {
+    const defaultDepGraph = (depGraphBuilder = new DepGraphBuilder(
+      { name: 'poetry' },
+      { name: 'dep-with-optional-dependency', version: '0.1.0' },
+    ));
+    const expectedGraph = defaultDepGraph
+      .addPkgNode({ name: 'flask', version: '3.1.0' }, 'flask', {
+        labels: { scope: 'prod' },
+      })
+      .connectDep(defaultDepGraph.rootNodeId, 'flask')
+      .addPkgNode({ name: 'asgiref', version: '3.8.1' }, 'asgiref', {
+        labels: { scope: 'prod' },
+      })
+      .connectDep('flask', 'asgiref')
+      .addPkgNode(
+        { name: 'typing-extensions', version: '4.12.2' },
+        'typing-extensions',
+        { labels: { scope: 'prod' } },
+      )
+      .connectDep('asgiref', 'typing-extensions')
+      .addPkgNode({ name: 'blinker', version: '1.9.0' }, 'blinker', {
+        labels: { scope: 'prod' },
+      })
+      .connectDep('flask', 'blinker')
+      .addPkgNode({ name: 'click', version: '8.1.8' }, 'click', {
+        labels: { scope: 'prod' },
+      })
+      .connectDep('flask', 'click')
+      .addPkgNode({ name: 'colorama', version: '0.4.6' }, 'colorama', {
+        labels: { scope: 'prod' },
+      })
+      .connectDep('click', 'colorama')
+      .addPkgNode(
+        { name: 'importlib-metadata', version: '8.5.0' },
+        'importlib-metadata',
+        { labels: { scope: 'prod' } },
+      )
+      .connectDep('flask', 'importlib-metadata')
+      .addPkgNode({ name: 'zipp', version: '3.21.0' }, 'zipp', {
+        labels: { scope: 'prod' },
+      })
+      .connectDep('importlib-metadata', 'zipp')
+      .addPkgNode({ name: 'itsdangerous', version: '2.2.0' }, 'itsdangerous', {
+        labels: { scope: 'prod' },
+      })
+      .connectDep('flask', 'itsdangerous')
+      .addPkgNode({ name: 'jinja2', version: '3.1.5' }, 'jinja2', {
+        labels: { scope: 'prod', pkgIdProvenance: 'Jinja2@3.1.5' },
+      })
+      .connectDep('flask', 'jinja2')
+      .addPkgNode({ name: 'markupsafe', version: '3.0.2' }, 'markupsafe', {
+        labels: { scope: 'prod', pkgIdProvenance: 'MarkupSafe@3.0.2' },
+      })
+      .connectDep('jinja2', 'markupsafe')
+      .addPkgNode({ name: 'werkzeug', version: '3.1.3' }, 'werkzeug', {
+        labels: { scope: 'prod', pkgIdProvenance: 'Werkzeug@3.1.3' },
+      })
+      .connectDep('flask', 'werkzeug')
+      .connectDep('werkzeug', 'markupsafe')
+      .build();
+
+    const isEqual = depGraphForScenarioAt(
+      'fixtures/v2/scenarios/dep-with-optional-dependency',
+      true,
+    ).equals(expectedGraph);
+    expect(isEqual).toBe(true);
+  });
+
   describe('on fixture oneDepWithOneDevDep yields graph with two packages', () => {
     const scenarioPath = 'fixtures/v2/scenarios/one-dep-one-devdep';
 
