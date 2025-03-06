@@ -35,7 +35,9 @@ export class V2Parser implements Parser {
 
     return groupDevDepNames;
   }
-
+  devDependenciesFrom(): string[] {
+    return this.getAllDevDependencyNames();
+  }
   getAllDevDependencyNames(): string[] {
     // pre-v1.2.0 naming convention
     const devDepsProperty = Object.keys(
@@ -64,7 +66,7 @@ export class V2Parser implements Parser {
       isDev: false,
     }));
     const devDependencies: Dependency[] = (
-      this.includeDevDependencies ? this.getAllDevDependencyNames() : []
+      this.includeDevDependencies ? this.devDependenciesFrom() : []
     ).map((devDep) => ({
       name: devDep,
       isDev: true,

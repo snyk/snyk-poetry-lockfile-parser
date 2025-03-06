@@ -29,7 +29,9 @@ export class V1Parser implements Parser {
       .map((depsObj) => Object.keys(depsObj))
       .reduce((acc, curr) => [...acc, ...curr], []);
   }
-
+  devDependenciesFrom(): string[] {
+    return this.getAllDevDependencyNames();
+  }
   getAllDevDependencyNames(): string[] {
     // pre-v1.2.0 naming convention
     const devDepsProperty = Object.keys(
@@ -51,7 +53,7 @@ export class V1Parser implements Parser {
       isDev: false,
     }));
     const devDependencies: Dependency[] = (
-      this.includeDevDependencies ? this.getAllDevDependencyNames() : []
+      this.includeDevDependencies ? this.devDependenciesFrom() : []
     ).map((devDep) => ({
       name: devDep,
       isDev: true,
