@@ -1,5 +1,5 @@
-import { readFixture } from './fixtures/utils';
-import { buildDepGraph } from '../lib';
+import { readFixture } from '../utils';
+import { buildDepGraph } from '../../../lib';
 import { DepGraphBuilder } from '@snyk/dep-graph';
 
 describe('buildDepGraph', () => {
@@ -36,9 +36,9 @@ describe('buildDepGraph', () => {
       .build();
 
     expect(
-      depGraphForScenarioAt(
-        'fixtures/v2/scenarios/one-dep-with-transitive',
-      ).equals(expectedGraph),
+      depGraphForScenarioAt('scenarios/one-dep-with-transitive').equals(
+        expectedGraph,
+      ),
     ).toBe(true);
   });
 
@@ -111,7 +111,7 @@ describe('buildDepGraph', () => {
   });
 
   describe('on fixture oneDepWithOneDevDep yields graph with two packages', () => {
-    const scenarioPath = 'fixtures/v2/scenarios/one-dep-one-devdep';
+    const scenarioPath = 'scenarios/one-dep-one-devdep';
 
     it('oneDepWithOneDevDep yields graph with two packages when including dev packages', () => {
       const includeDevDependencies = true;
@@ -150,7 +150,7 @@ describe('buildDepGraph', () => {
     });
   });
   describe('on fixture oneDevDepWithOneDevDepGroup yields graph with two packages', () => {
-    const scenarioPath = 'fixtures/v2/scenarios/one-dep-one-devdep-group';
+    const scenarioPath = 'scenarios/one-dep-one-devdep-group';
 
     it('oneDevDepWithOneDevDepGroup yields graph with two packages when including dev packages', () => {
       const includeDevDependencies = true;
@@ -192,8 +192,7 @@ describe('buildDepGraph', () => {
     });
   });
   describe('on fixture oneDepWithOneDevDepAndMultipleDevDepGroups yields graph with three packages', () => {
-    const scenarioPath =
-      'fixtures/v2/scenarios/one-dep-one-devdep-multiple-devdep-groups';
+    const scenarioPath = 'scenarios/one-dep-one-devdep-multiple-devdep-groups';
 
     it('oneDepWithOneDevDepAndMultipleDevDepGroups yields graph with three packages when including dev packages', () => {
       const includeDevDependencies = true;
@@ -240,17 +239,13 @@ describe('buildDepGraph', () => {
     });
   });
   it('on fixture circularDependency yields graph successfully', () => {
-    const actualGraph = depGraphForScenarioAt(
-      'fixtures/v2/scenarios/circular-dependency',
-    );
+    const actualGraph = depGraphForScenarioAt('scenarios/circular-dependency');
     expect(actualGraph).toBeDefined();
     expect(actualGraph.getDepPkgs().length).toBe(13);
   });
   it('on fixture with unsafe package yields graph successfully', () => {
     // Package is in virtualenv and doesn't have an entry in poetry.lock
-    const actualGraph = depGraphForScenarioAt(
-      'fixtures/v2/scenarios/unsafe-packages',
-    );
+    const actualGraph = depGraphForScenarioAt('scenarios/unsafe-packages');
     expect(actualGraph).toBeDefined();
     expect(actualGraph.getDepPkgs().length).toBe(2);
   });
@@ -290,7 +285,7 @@ describe('buildDepGraph', () => {
       .build();
 
     const isEqual = depGraphForScenarioAt(
-      'fixtures/v2/scenarios/dev-deps-only',
+      'scenarios/dev-deps-only',
       includeDevDependencies,
     ).equals(expectedGraph);
     expect(isEqual).toBe(true);

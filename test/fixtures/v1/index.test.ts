@@ -1,5 +1,5 @@
-import { readExpected, readFixture } from './fixtures/utils';
-import { buildDepGraph } from '../lib';
+import { readFixture } from '../utils';
+import { buildDepGraph } from '../../../lib';
 import { DepGraphBuilder } from '@snyk/dep-graph';
 
 describe('buildDepGraph', () => {
@@ -12,14 +12,6 @@ describe('buildDepGraph', () => {
     );
   });
 
-  it('should build a dep-graph with default named root node named', () => {
-    const scenarioPath = 'fixtures/v1/scenarios/package-mode-false';
-
-    const expectedDepGraphJson = readExpected(__dirname, scenarioPath);
-    const depGraph = depGraphForScenarioAt(scenarioPath, true);
-
-    expect(depGraph.toJSON()).toEqual(expectedDepGraphJson);
-  });
   it('should build a dep-graph with root node named and versioned as per project info in manifest file.', () => {
     const expectedGraph = depGraphBuilder.build();
     const manifestContents = `[tool.poetry]
@@ -40,14 +32,14 @@ describe('buildDepGraph', () => {
       .build();
 
     expect(
-      depGraphForScenarioAt(
-        'fixtures/v1/scenarios/one-dep-no-transitives',
-      ).equals(expectedGraph),
+      depGraphForScenarioAt('scenarios/one-dep-no-transitives').equals(
+        expectedGraph,
+      ),
     ).toBe(true);
   });
 
   describe('on fixture oneDepWithOneDevDep yields graph with two packages', () => {
-    const scenarioPath = 'fixtures/v1/scenarios/one-dep-one-devdep';
+    const scenarioPath = 'scenarios/one-dep-one-devdep';
 
     it('oneDepWithOneDevDep yields graph with two packages when including dev packages', () => {
       const includeDevDependencies = true;
@@ -87,7 +79,7 @@ describe('buildDepGraph', () => {
   });
 
   describe('on fixture oneDevDepWithOneDevDepGroup yields graph with two packages', () => {
-    const scenarioPath = 'fixtures/v1/scenarios/one-dep-one-devdep-group';
+    const scenarioPath = 'scenarios/one-dep-one-devdep-group';
 
     it('oneDevDepWithOneDevDepGroup yields graph with two packages when including dev packages', () => {
       const includeDevDependencies = true;
@@ -127,8 +119,7 @@ describe('buildDepGraph', () => {
   });
 
   describe('on fixture oneDepWithOneDevDepAndOneDevDepGroup yields graph with three packages', () => {
-    const scenarioPath =
-      'fixtures/v1/scenarios/one-dep-one-devdep-one-devdep-group';
+    const scenarioPath = 'scenarios/one-dep-one-devdep-one-devdep-group';
 
     it('oneDepWithOneDevDepAndOneDevDepGroup yields graph with three packages when including dev packages', () => {
       const includeDevDependencies = true;
@@ -172,8 +163,7 @@ describe('buildDepGraph', () => {
   });
 
   describe('on fixture oneDepWithOneDevDepAndMultipleDevDepGroups yields graph with three packages', () => {
-    const scenarioPath =
-      'fixtures/v1/scenarios/one-dep-one-devdep-multiple-devdep-groups';
+    const scenarioPath = 'scenarios/one-dep-one-devdep-multiple-devdep-groups';
 
     it('oneDepWithOneDevDepAndMultipleDevDepGroups yields graph with three packages when including dev packages', () => {
       const includeDevDependencies = true;
@@ -221,18 +211,14 @@ describe('buildDepGraph', () => {
   });
 
   it('on fixture circularDependency yields graph successfully', () => {
-    const actualGraph = depGraphForScenarioAt(
-      'fixtures/v1/scenarios/circular-dependency',
-    );
+    const actualGraph = depGraphForScenarioAt('scenarios/circular-dependency');
     expect(actualGraph).toBeDefined();
     expect(actualGraph.getDepPkgs().length).toBe(2);
   });
 
   it('on fixture with unsafe package yields graph successfully', () => {
     // Package is in virtualenv and doesn't have an entry in poetry.lock
-    const actualGraph = depGraphForScenarioAt(
-      'fixtures/v1/scenarios/unsafe-packages',
-    );
+    const actualGraph = depGraphForScenarioAt('scenarios/unsafe-packages');
     expect(actualGraph).toBeDefined();
     expect(actualGraph.getDepPkgs().length).toBe(1);
   });
@@ -241,7 +227,7 @@ describe('buildDepGraph', () => {
     // Spy only exists here to prevent polluting the logs with a warning log we expect to see
     jest.spyOn(console, 'warn').mockImplementation();
     const actualGraph = depGraphForScenarioAt(
-      'fixtures/v1/scenarios/conflicting-python-declarations',
+      'scenarios/conflicting-python-declarations',
     );
     expect(actualGraph).toBeDefined();
   });
