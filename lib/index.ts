@@ -3,14 +3,13 @@ import * as manifest from './manifest-parser';
 import * as lockFile from './lock-file-parser';
 import { PoetryLockFileDependency } from './lock-file-parser';
 import * as poetryDepGraphBuilder from './poetry-dep-graph-builder';
-import { Dependency } from './parsers/types';
 
 export function buildDepGraph(
   manifestFileContents: string,
   lockFileContents: string,
   includeDevDependencies = false,
 ): DepGraph {
-  const dependencies: Dependency[] = manifest.getDependenciesFrom(
+  const dependencies: manifest.Dependency[] = manifest.getDependenciesFrom(
     manifestFileContents,
     includeDevDependencies,
   );
