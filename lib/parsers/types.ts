@@ -20,7 +20,7 @@ export interface V2Manifest {
     ];
     readme: string;
     'requires-python': string;
-    dependencies?: string[];
+    dependencies: string[];
   };
   'build-system': {
     requires: string[];
