@@ -5,14 +5,14 @@ interface Fixture {
   lockFileContents: string;
 }
 
-export function readFixture(folderName: string): Fixture {
+export function readFixture(root: string, folderName: string): Fixture {
   return {
     manifestFileContents: fs.readFileSync(
-      `${__dirname}/${folderName}/pyproject.toml`,
+      `${root}/${folderName}/pyproject.toml`,
       'utf8',
     ),
     lockFileContents: fs.readFileSync(
-      `${__dirname}/${folderName}/poetry.lock`,
+      `${root}/${folderName}/poetry.lock`,
       'utf8',
     ),
   };
