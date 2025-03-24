@@ -1,0 +1,15 @@
+[project]
+name = "myPkg"
+version = "1.42.2"
+description = ""
+authors = [
+    {name = "Your Name",email = "you@example.com"}
+]
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "gunicorn (>=20.0.4)",
+]
+[build-system]
+requires = ["poetry-core>=3.8"]
+build-backend = "poetry.core.masonry.api"
