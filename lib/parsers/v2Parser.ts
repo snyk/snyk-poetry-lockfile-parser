@@ -43,16 +43,16 @@ export class V2Parser implements Parser {
   getAllDevDependencyNames(): string[] {
     // pre-v1.2.0 naming convention
     const devDepsProperty = Object.keys(
-      this.manifest.tool?.poetry.group?.dev.dependencies ?? [],
+      this.manifest.tool?.poetry?.group?.dev?.dependencies ?? [],
     );
     const legacyDevDepsProperty = Object.keys(
-      this.manifest.tool?.poetry['dev-dependencies'] ?? [],
+      this.manifest.tool?.poetry?.['dev-dependencies'] ?? [],
     );
     // post-v1.2.0 dependency groups
     // https://python-poetry.org/docs/master/managing-dependencies
     // we will handle all tool.poetry.group.<group> as dev-deps
-    const groupDevDepsProperty = this.manifest.tool?.poetry.group
-      ? this.getGroupDevDepNames(this.manifest.tool?.poetry.group)
+    const groupDevDepsProperty = this.manifest.tool?.poetry?.group
+      ? this.getGroupDevDepNames(this.manifest.tool?.poetry?.group)
       : [];
 
     return [
