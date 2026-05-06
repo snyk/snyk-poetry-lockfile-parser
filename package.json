@@ -33,7 +33,7 @@
     "@iarna/toml": "^2.2.5",
     "@snyk/cli-interface": "^2.9.2",
     "@snyk/dep-graph": "^2.3.0",
-    "@snyk/error-catalog-nodejs-public": "^4.0.1",
+    "@snyk/error-catalog-nodejs-public": "^5.34.2",
     "debug": "^4.2.0",
     "lodash": "^4.18.1",
     "tslib": "^2.0.0"
