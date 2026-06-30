@@ -4,7 +4,13 @@
   "homepage": "https://github.com/snyk/snyk-poetry-lockfile-parser#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/snyk/snyk-poetry-lockfile-parser"
+    "url": "https://github.com/snyk/snyk-poetry-lockfile-parser.git"
+  },
+  "bugs": {
+    "url": "https://github.com/snyk/snyk-poetry-lockfile-parser/issues"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "author": "snyk.io",
   "license": "Apache-2.0",
