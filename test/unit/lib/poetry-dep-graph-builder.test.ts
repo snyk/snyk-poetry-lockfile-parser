@@ -158,7 +158,8 @@ describe('poetry-dep-graph-builder', () => {
       expect(node!.info?.labels).toEqual({
         scope: 'prod',
         'hash:sha-256': 'wheel',
-        'distribution:url': 'https://index.example/simple/pkg-a/',
+        'distribution:url':
+          'https://index.example/simple/pkg-a/#pkg-a-1.0.0-py3-none-any.whl',
       });
     });
 

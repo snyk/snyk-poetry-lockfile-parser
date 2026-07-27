@@ -41,17 +41,17 @@ const HASH_ALG_TO_LABEL: Record<string, string> = {
 export function getComponentMetadataLabels(
   pkg: ComponentMetadataInput,
 ): Record<string, string> {
+  // Select the artifact once so the hash and the distribution URL describe the *same* file.
+  const selected = selectArtifact(pkg.name, pkg.files);
   return {
-    ...hashLabel(pkg.name, pkg.files),
-    ...distributionUrlLabel(pkg.name, pkg.source),
+    ...hashLabel(selected),
+    ...distributionUrlLabel(pkg.name, pkg.source, selected),
   };
 }
 
 function hashLabel(
-  name: string,
-  files?: LockFileEntryFile[],
+  selected: LockFileEntryFile | undefined,
 ): Record<string, string> {
-  const selected = selectArtifact(name, files);
   if (!selected) {
     return {};
   }
@@ -117,7 +117,8 @@ function hashToLabel(hash: string): Record<string, string> {
 
 function distributionUrlLabel(
   name: string,
-  source?: LockFileEntrySource,
+  source: LockFileEntrySource | undefined,
+  selected: LockFileEntryFile | undefined,
 ): Record<string, string> {
   if (!source || !source.url) {
     return {};
@@ -128,11 +129,14 @@ function distributionUrlLabel(
     return cleaned ? { 'distribution:url': cleaned } : {};
   }
   // Private index (PEP 503 Simple API repository). poetry recorded the real index root, so
-  // we build the package's project page: <root>/<pep503-normalized-name>/. This is a
-  // package-granular provenance URL, not the exact-artifact download URL (which lives in
-  // the page's anchors and would need a network fetch we deliberately avoid).
+  // we build the package's project page and point it at the selected file:
+  // <root>/<pep503-normalized-name>/#<selected-filename>. The `#<filename>` is an identifier
+  // fragment (which file the sibling hash label describes), NOT a navigable anchor or a
+  // download URL — the page's real anchors link to the artifacts, which we cannot
+  // reconstruct offline. When no artifact was selected we emit the bare package-granular
+  // project page.
   if (source.type === 'legacy') {
-    const projectPage = buildSimpleIndexProjectUrl(source.url, name);
+    const projectPage = buildSimpleIndexProjectUrl(source.url, name, selected);
     return projectPage ? { 'distribution:url': projectPage } : {};
   }
   // git / file / directory: not a downloadable distribution artifact.
@@ -142,13 +146,15 @@ function distributionUrlLabel(
 function buildSimpleIndexProjectUrl(
   root: string,
   name: string,
+  selected: LockFileEntryFile | undefined,
 ): string | undefined {
   const cleaned = sanitizeUrl(root);
   if (!cleaned) {
     return undefined;
   }
   const base = cleaned.replace(/\/+$/, '');
-  return `${base}/${normalizePep503Name(name)}/`;
+  const projectPage = `${base}/${normalizePep503Name(name)}/`;
+  return selected ? `${projectPage}#${selected.file}` : projectPage;
 }
 
 // PEP 503: normalize by lowercasing and collapsing runs of -, _, . to a single -.

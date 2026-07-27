@@ -100,7 +100,7 @@ describe('getComponentMetadataLabels', () => {
       );
     });
 
-    it('builds the PEP 503 project-page URL for a `legacy` private index', () => {
+    it('builds the PEP 503 project-page URL for a `legacy` private index, pointing at the selected file', () => {
       const labels = getComponentMetadataLabels({
         name: 'Internal_Lib',
         files: [{ file: 'internal_lib-2.3.0.tar.gz', hash: 'sha256:a' }],
@@ -111,7 +111,43 @@ describe('getComponentMetadataLabels', () => {
         },
       });
       expect(labels['distribution:url']).toBe(
-        'https://artifactory.internal.example/api/pypi/pypi-remote/simple/internal-lib/',
+        'https://artifactory.internal.example/api/pypi/pypi-remote/simple/internal-lib/#internal_lib-2.3.0.tar.gz',
+      );
+    });
+
+    it('points the fragment at the ladder-selected file so URL and hash agree', () => {
+      const labels = getComponentMetadataLabels({
+        name: 'six',
+        files: [
+          { file: 'six-1.17.0-py2.py3-none-any.whl', hash: 'sha256:wheel' },
+          { file: 'six-1.17.0.tar.gz', hash: 'sha256:sdist' },
+        ],
+        source: { type: 'legacy', url: 'https://index.example/simple' },
+      });
+      expect(labels['hash:sha-256']).toBe('wheel');
+      expect(labels['distribution:url']).toBe(
+        'https://index.example/simple/six/#six-1.17.0-py2.py3-none-any.whl',
+      );
+    });
+
+    it('emits the bare project-page URL when no artifact could be selected', () => {
+      const labels = getComponentMetadataLabels({
+        name: 'nvidia-cublas-cu12',
+        files: [
+          {
+            file: 'nvidia_cublas_cu12-1-py3-none-manylinux2014_x86_64.whl',
+            hash: 'sha256:p1',
+          },
+          {
+            file: 'nvidia_cublas_cu12-1-py3-none-win_amd64.whl',
+            hash: 'sha256:p2',
+          },
+        ],
+        source: { type: 'legacy', url: 'https://index.example/simple' },
+      });
+      expect(labels['hash:sha-256']).toBeUndefined();
+      expect(labels['distribution:url']).toBe(
+        'https://index.example/simple/nvidia-cublas-cu12/',
       );
     });
 
@@ -122,7 +158,7 @@ describe('getComponentMetadataLabels', () => {
         source: { type: 'legacy', url: 'https://index.example/simple/' },
       });
       expect(labels['distribution:url']).toBe(
-        'https://index.example/simple/foo/',
+        'https://index.example/simple/foo/#foo-1.0.0.tar.gz',
       );
     });
 
@@ -136,7 +172,7 @@ describe('getComponentMetadataLabels', () => {
         },
       });
       expect(labels['distribution:url']).toBe(
-        'https://index.example/simple/foo/',
+        'https://index.example/simple/foo/#foo-1.0.0.tar.gz',
       );
     });
 
