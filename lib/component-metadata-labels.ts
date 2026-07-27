@@ -2,14 +2,13 @@ import * as debugLib from 'debug';
 
 const debug = debugLib('snyk-poetry-lockfile-parser');
 
-// Component-metadata labels follow the convention established in nodejs-lockfile-parser:
-// `hash:<alg>` keys with hyphenated algorithm names and lowercase-hex values, and a
-// credential-stripped `distribution:url`. These feed sbom-export's Component.Hashes[] and
-// the "distribution" ExternalUrls entry.
+// Component-metadata labels use the shape sbom-export consumes: `hash:<alg>` keys with
+// hyphenated algorithm names and lowercase-hex values (feeding Component.Hashes[]), and a
+// credential-stripped `distribution:url` (feeding the "distribution" ExternalUrls entry).
 //
 // See docs/component-metadata.md for the full rationale: why we emit one artifact per node
-// (the label channel is single-valued and the lockfile is a platform-agnostic *set*), why
-// the common PyPI case has no URL, and how the `legacy` private-index URL is constructed.
+// (the label channel is single-valued and the lockfile is a platform-agnostic *set*), how the
+// distribution:url is derived per source type, and how the `legacy` private-index URL is built.
 
 export interface LockFileEntryFile {
   file: string;
