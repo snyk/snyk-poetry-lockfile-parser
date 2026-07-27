@@ -70,16 +70,15 @@ describe('getComponentMetadataLabels', () => {
         name: 'x',
         files: [{ file: 'x-1.0.0.tar.gz', hash: 'sha256:AABBCC' }],
       });
-      expect(labels).toEqual({ 'hash:sha-256': 'aabbcc' });
+      expect(labels['hash:sha-256']).toBe('aabbcc');
     });
 
     it('ignores an unrecognised / malformed hash', () => {
-      expect(
-        getComponentMetadataLabels({
-          name: 'x',
-          files: [{ file: 'x-1.0.0.tar.gz', hash: 'notahash' }],
-        }),
-      ).toEqual({});
+      const labels = getComponentMetadataLabels({
+        name: 'x',
+        files: [{ file: 'x-1.0.0.tar.gz', hash: 'notahash' }],
+      });
+      expect(labels['hash:sha-256']).toBeUndefined();
     });
   });
 
@@ -189,13 +188,37 @@ describe('getComponentMetadataLabels', () => {
       expect(labels['distribution:url']).toBeUndefined();
     });
 
-    it('emits no URL for the common PyPI case (no source stanza)', () => {
+    it('builds the pypi.org project-page URL for the default PyPI case (no source stanza)', () => {
+      // No `[package.source]` reliably means the built-in PyPI (poetry records a stanza for
+      // every other index, including a custom primary source), so we can assume pypi.org.
       const labels = getComponentMetadataLabels({
-        name: 'requests',
+        name: 'Requests',
         files: [{ file: 'requests-2.0.0.tar.gz', hash: 'sha256:a' }],
       });
-      expect(labels['distribution:url']).toBeUndefined();
       expect(labels['hash:sha-256']).toBe('a');
+      expect(labels['distribution:url']).toBe(
+        'https://pypi.org/simple/requests/#requests-2.0.0.tar.gz',
+      );
+    });
+
+    it('emits a bare pypi.org page when no artifact is selected for a PyPI package', () => {
+      const labels = getComponentMetadataLabels({
+        name: 'onlyplatwheels',
+        files: [
+          {
+            file: 'onlyplatwheels-1-cp311-cp311-manylinux1_x86_64.whl',
+            hash: 'sha256:a',
+          },
+          {
+            file: 'onlyplatwheels-1-cp311-cp311-win_amd64.whl',
+            hash: 'sha256:b',
+          },
+        ],
+      });
+      expect(labels['hash:sha-256']).toBeUndefined();
+      expect(labels['distribution:url']).toBe(
+        'https://pypi.org/simple/onlyplatwheels/',
+      );
     });
   });
 });

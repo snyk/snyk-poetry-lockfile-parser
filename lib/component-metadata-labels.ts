@@ -41,6 +41,11 @@ const HASH_ALG_TO_LABEL: Record<string, string> = {
 export function getComponentMetadataLabels(
   pkg: ComponentMetadataInput,
 ): Record<string, string> {
+  // No files recorded means no artifact to hash and no distribution to point at (real PyPI /
+  // index packages always list files; fileless entries are anomalous), so report nothing.
+  if (!pkg.files || pkg.files.length === 0) {
+    return {};
+  }
   // Select the artifact once so the hash and the distribution URL describe the *same* file.
   const selected = selectArtifact(pkg.name, pkg.files);
   return {
@@ -115,32 +120,46 @@ function hashToLabel(hash: string): Record<string, string> {
   return { [label]: value.toLowerCase() };
 }
 
+// poetry records a `[package.source]` stanza for every index except the built-in PyPI
+// (including a custom primary/default source, which is recorded as `legacy`). So the absence
+// of a source stanza reliably means the package came from pypi.org, and we can build its
+// PEP 503 project page from this well-known root.
+const PYPI_SIMPLE_ROOT = 'https://pypi.org/simple';
+
 function distributionUrlLabel(
   name: string,
   source: LockFileEntrySource | undefined,
   selected: LockFileEntryFile | undefined,
 ): Record<string, string> {
-  if (!source || !source.url) {
-    return {};
+  // No source stanza => built-in PyPI. Build its project page (see PYPI_SIMPLE_ROOT note).
+  if (!source) {
+    return projectPageLabel(PYPI_SIMPLE_ROOT, name, selected);
   }
   // Direct-URL dependency: the source URL is the exact artifact.
-  if (source.type === 'url') {
+  if (source.type === 'url' && source.url) {
     const cleaned = sanitizeUrl(source.url);
     return cleaned ? { 'distribution:url': cleaned } : {};
   }
-  // Private index (PEP 503 Simple API repository). poetry recorded the real index root, so
-  // we build the package's project page and point it at the selected file:
-  // <root>/<pep503-normalized-name>/#<selected-filename>. The `#<filename>` is an identifier
-  // fragment (which file the sibling hash label describes), NOT a navigable anchor or a
-  // download URL — the page's real anchors link to the artifacts, which we cannot
-  // reconstruct offline. When no artifact was selected we emit the bare package-granular
-  // project page.
-  if (source.type === 'legacy') {
-    const projectPage = buildSimpleIndexProjectUrl(source.url, name, selected);
-    return projectPage ? { 'distribution:url': projectPage } : {};
+  // Private index (PEP 503 Simple API repository): poetry recorded the real index root.
+  if (source.type === 'legacy' && source.url) {
+    return projectPageLabel(source.url, name, selected);
   }
   // git / file / directory: not a downloadable distribution artifact.
   return {};
+}
+
+// Build the PEP 503 project-page URL for `name` under `root`, pointed at the selected file:
+// <root>/<pep503-normalized-name>/#<selected-filename>. The `#<filename>` is an identifier
+// fragment (which file the sibling hash label describes), NOT a navigable anchor or a
+// download URL — the page's real anchors link to the artifacts, which we cannot reconstruct
+// offline. When no artifact was selected we emit the bare package-granular project page.
+function projectPageLabel(
+  root: string,
+  name: string,
+  selected: LockFileEntryFile | undefined,
+): Record<string, string> {
+  const projectPage = buildSimpleIndexProjectUrl(root, name, selected);
+  return projectPage ? { 'distribution:url': projectPage } : {};
 }
 
 function buildSimpleIndexProjectUrl(
