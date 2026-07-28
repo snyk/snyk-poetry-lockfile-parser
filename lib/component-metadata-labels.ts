@@ -6,9 +6,18 @@ const debug = debugLib('snyk-poetry-lockfile-parser');
 // hyphenated algorithm names and lowercase-hex values (feeding Component.Hashes[]), and a
 // credential-stripped `distribution:url` (feeding the "distribution" ExternalUrls entry).
 //
-// See docs/component-metadata.md for the full rationale: why we emit one artifact per node
-// (the label channel is single-valued and the lockfile is a platform-agnostic *set*), how the
-// distribution:url is derived per source type, and how the `legacy` private-index URL is built.
+// Two properties of poetry.lock drive the design here, and are why this isn't a straight
+// copy of the label mapping other ecosystems use:
+//
+//  1. A package's `files` is a platform-agnostic *set* — the sdist plus every published
+//     wheel. A label holds a single value (and a CycloneDX Component.Hashes[] means "one
+//     artifact, several algorithms", not "several artifacts"), so we must collapse to one
+//     artifact. selectArtifact() does that deterministically, without needing to know a
+//     target platform.
+//  2. The lock never records an artifact *download* URL, and we must not fetch one (the
+//     same code path serves private indexes whose credentials we don't hold). What poetry
+//     does record is the index a package came from, so distribution:url is a PEP 503
+//     project-page URL pointed at the selected file — see distributionUrlLabel().
 
 export interface LockFileEntryFile {
   file: string;

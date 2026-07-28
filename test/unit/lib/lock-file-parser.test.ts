@@ -91,6 +91,41 @@ describe('when loading lockfile', () => {
     ]);
   });
 
+  // poetry 1.x (lock v1 family) records a `[package.source]` stanza for a configured index
+  // just as 2.x does, including for a custom *primary/default* source. Verified against
+  // poetry 1.1.15: a `default = true` source yields `type = "legacy"` with its own root.
+  // This matters because the absence of a source stanza is what we treat as "built-in
+  // PyPI" — a v1 lock resolved from a private index must not look bare.
+  it('reads `[package.source]` alongside the v1 `[metadata.files]` layout', () => {
+    const fileContents = `[[package]]
+      category = "main"
+      name = "internal-lib"
+      optional = false
+      version = "2.3.0"
+
+      [package.source]
+      type = "legacy"
+      url = "https://artifactory.internal.example/api/pypi/pypi-remote/simple"
+      reference = "internal"
+
+      [metadata]
+      lock-version = "1.1"
+
+      [metadata.files]
+      internal-lib = [
+        {file = "internal_lib-2.3.0-py3-none-any.whl", hash = "sha256:aaaa"},
+      ]`;
+    const [pkg] = packageSpecsFrom(fileContents);
+    expect(pkg.files).toEqual([
+      { file: 'internal_lib-2.3.0-py3-none-any.whl', hash: 'sha256:aaaa' },
+    ]);
+    expect(pkg.source).toEqual({
+      type: 'legacy',
+      url: 'https://artifactory.internal.example/api/pypi/pypi-remote/simple',
+      reference: 'internal',
+    });
+  });
+
   it('should return an empty list when no packages are specified in file', () => {
     const lockFileDependencies = packageSpecsFrom('package = []');
     expect(lockFileDependencies.length).toBe(0);
