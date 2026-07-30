@@ -2,6 +2,7 @@ import { defaults } from 'lodash';
 import { DepGraph, DepGraphBuilder, PkgInfo } from '@snyk/dep-graph';
 import { PoetryLockFileDependency } from './lock-file-parser';
 import { Dependency } from './parsers/types';
+import { getComponentMetadataLabels } from './component-metadata-labels';
 
 // Poetry uses the virtualenv to create an environment and this comes with these
 // packages pre-installed, therefore they won't be part of the lockfile.
@@ -28,10 +29,17 @@ export function build(
   pkgDetails: PkgInfo,
   dependencies: Dependency[],
   pkgSpecs: PoetryLockFileDependency[],
+  includeComponentMetadata = false,
 ): DepGraph {
   const rootPkg = defaults({}, pkgDetails, DEFAULT_ROOT_PKG);
   const builder = new DepGraphBuilder({ name: 'poetry' }, rootPkg);
-  addDependenciesToGraph(dependencies, pkgSpecs, builder.rootNodeId, builder);
+  addDependenciesToGraph(
+    dependencies,
+    pkgSpecs,
+    builder.rootNodeId,
+    builder,
+    includeComponentMetadata,
+  );
   return builder.build();
 }
 
@@ -40,9 +48,16 @@ function addDependenciesToGraph(
   pkgSpecs: PoetryLockFileDependency[],
   parentNodeId: string,
   builder: DepGraphBuilder,
+  includeComponentMetadata: boolean,
 ) {
   for (const dep of dependencies) {
-    addDependenciesForPkg(dep, pkgSpecs, parentNodeId, builder);
+    addDependenciesForPkg(
+      dep,
+      pkgSpecs,
+      parentNodeId,
+      builder,
+      includeComponentMetadata,
+    );
   }
 }
 
@@ -51,6 +66,7 @@ function addDependenciesForPkg(
   pkgSpecs: PoetryLockFileDependency[],
   parentNodeId: string,
   builder: DepGraphBuilder,
+  includeComponentMetadata: boolean,
 ) {
   const pkgName = dependency.name;
   if (IGNORED_DEPENDENCIES.includes(pkgName)) {
@@ -72,6 +88,16 @@ function addDependenciesForPkg(
   if (pkg.name != pkgName) {
     labels.pkgIdProvenance = `${pkgName}@${pkg.version}`;
   }
+  if (includeComponentMetadata) {
+    Object.assign(
+      labels,
+      getComponentMetadataLabels({
+        name: pkg.name,
+        files: pkg.files,
+        source: pkg.source,
+      }),
+    );
+  }
   builder
     .addPkgNode(pkgInfo, pkg.name, {
       labels,
@@ -85,6 +111,7 @@ function addDependenciesForPkg(
     pkgSpecs,
     pkg.name,
     builder,
+    includeComponentMetadata,
   );
 }
 
