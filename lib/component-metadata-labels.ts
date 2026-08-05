@@ -189,12 +189,20 @@ function normalizePep503Name(name: string): string {
   return name.toLowerCase().replace(/[-_.]+/g, '-');
 }
 
-// Strip embedded basic-auth credentials and any URL fragment before emitting.
+// Reduce a source URL to its canonical identity before it becomes a
+// distribution:url provenance label: clear basic-auth userinfo, the query
+// string, and the fragment. distribution:url is not a fetch target — a PEP 503
+// project page is `<root>/<pkg>/#<file>` and needs no query, and a direct-url
+// artifact's query is not part of its identity — so the query never belongs in
+// the label. Query strings can also carry authentication material, so dropping
+// them keeps that out of the label. The fragment is re-added by the caller from
+// the selected artifact, so a source-provided one is noise.
 function sanitizeUrl(rawUrl: string): string | undefined {
   try {
     const url = new URL(rawUrl);
     url.username = '';
     url.password = '';
+    url.search = '';
     url.hash = '';
     return url.toString();
   } catch {
