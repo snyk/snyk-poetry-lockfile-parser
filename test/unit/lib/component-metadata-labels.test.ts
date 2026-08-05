@@ -175,6 +175,60 @@ describe('getComponentMetadataLabels', () => {
       );
     });
 
+    it('strips a query-string token from a legacy index URL', () => {
+      // Some private indexes carry authentication material in the query string
+      // rather than as basic-auth userinfo. It is not part of the artifact's
+      // identity, so it must not appear in the label — and it must not corrupt
+      // the appended project path.
+      const labels = getComponentMetadataLabels({
+        name: 'foo',
+        files: [{ file: 'foo-1.0.0.tar.gz', hash: 'sha256:a' }],
+        source: {
+          type: 'legacy',
+          url: 'https://index.example/simple?token=s3cr3t',
+        },
+      });
+      expect(labels['distribution:url']).toBe(
+        'https://index.example/simple/foo/#foo-1.0.0.tar.gz',
+      );
+    });
+
+    it('strips a signed-URL query from a direct `url` source', () => {
+      // A direct-URL dependency can point at a signed artifact URL whose query
+      // string is authentication material rather than identity. distribution:url
+      // is provenance, not a fetch target, so the query is dropped.
+      const labels = getComponentMetadataLabels({
+        name: 'example-pkg',
+        files: [
+          { file: 'example_pkg-1.0.0-py3-none-any.whl', hash: 'sha256:a' },
+        ],
+        source: {
+          type: 'url',
+          url:
+            'https://bucket.s3.example/example_pkg-1.0.0-py3-none-any.whl' +
+            '?X-Amz-Signature=deadbeef&X-Amz-Credential=AKIA',
+        },
+      });
+      expect(labels['distribution:url']).toBe(
+        'https://bucket.s3.example/example_pkg-1.0.0-py3-none-any.whl',
+      );
+    });
+
+    it('strips userinfo and query together', () => {
+      const labels = getComponentMetadataLabels({
+        name: 'foo',
+        files: [{ file: 'foo-1.0.0.tar.gz', hash: 'sha256:a' }],
+        source: {
+          type: 'legacy',
+          url: 'https://user:pass@index.example/simple?token=s3cr3t',
+        },
+      });
+      const url = labels['distribution:url'];
+      expect(url).toBe('https://index.example/simple/foo/#foo-1.0.0.tar.gz');
+      expect(url).not.toContain('s3cr3t');
+      expect(url).not.toContain('user:pass');
+    });
+
     it('emits no URL for a git source', () => {
       const labels = getComponentMetadataLabels({
         name: 'forked-tool',
