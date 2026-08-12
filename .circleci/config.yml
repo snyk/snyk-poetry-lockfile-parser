@@ -32,7 +32,9 @@ commands:
     steps:
       - run:
           name: Release
-          command: npx semantic-release
+          command: |
+            export NPM_ID_TOKEN=$(circleci run oidc get --claims '{"aud": "npm:registry.npmjs.org"}')
+            npx semantic-release@25.0.3
   lint:
     steps:
       - run:
@@ -105,6 +107,7 @@ workflows:
           name: Scan repository for secrets
           context:
             - snyk-bot-slack
+            - prodsec-orb-runtime
           channel: snyk-vuln-alerts-sca
           filters:
             branches:
@@ -113,7 +116,9 @@ workflows:
 
       - security-scans:
           name: Security Scans
-          context: open_source-managed
+          context:
+            - open_source-managed
+            - prodsec-orb-runtime
           filters:
             branches:
               ignore:
@@ -133,6 +138,7 @@ workflows:
                 - 18.20.6
                 - 20.18.3
                 - 22.14.0
+                - 24.18.0
           filters:
             branches:
               ignore:
@@ -141,14 +147,18 @@ workflows:
     jobs:
       - security-scans:
           name: Security Scans
-          context: open_source-managed
+          context:
+            - open_source-managed
+            - prodsec-orb-runtime
           filters:
             branches:
               only:
                 - master
 
       - release:
-          context: nodejs-lib-release
+          context:
+            - nodejs-install
+            - github-release
           filters:
             branches:
               only:

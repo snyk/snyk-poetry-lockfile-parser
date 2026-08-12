@@ -125,6 +125,44 @@ describe('poetry-dep-graph-builder', () => {
         .graph.nodes.filter((node) => node.nodeId === pkgA.name);
     });
 
+    it('does not emit component-metadata labels by default', () => {
+      const pkgA = generatePoetryLockFileDependency('pkg-a');
+      pkgA.files = [{ file: 'pkg-a-1.0.0.tar.gz', hash: 'sha256:abc' }];
+
+      const result = build(rootPkg, [{ name: 'pkg-a', isDev: false }], [pkgA]);
+
+      const node = result
+        .toJSON()
+        .graph.nodes.find((n) => n.nodeId === pkgA.name);
+      expect(node!.info?.labels).toEqual({ scope: 'prod' });
+    });
+
+    it('emits component-metadata labels when includeComponentMetadata is true', () => {
+      const pkgA = generatePoetryLockFileDependency('pkg-a');
+      pkgA.files = [
+        { file: 'pkg-a-1.0.0-py3-none-any.whl', hash: 'sha256:WHEEL' },
+        { file: 'pkg-a-1.0.0.tar.gz', hash: 'sha256:sdist' },
+      ];
+      pkgA.source = { type: 'legacy', url: 'https://index.example/simple' };
+
+      const result = build(
+        rootPkg,
+        [{ name: 'pkg-a', isDev: false }],
+        [pkgA],
+        true,
+      );
+
+      const node = result
+        .toJSON()
+        .graph.nodes.find((n) => n.nodeId === pkgA.name);
+      expect(node!.info?.labels).toEqual({
+        scope: 'prod',
+        'hash:sha-256': 'wheel',
+        'distribution:url':
+          'https://index.example/simple/pkg-a/#pkg-a-1.0.0-py3-none-any.whl',
+      });
+    });
+
     it('should log warning if metadata cannot be found in pkgSpecs', () => {
       // given
       const missingPkg = 'non-existent-pkg';

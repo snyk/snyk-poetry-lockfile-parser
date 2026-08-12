@@ -295,6 +295,26 @@ describe('buildDepGraph', () => {
     ).equals(expectedGraph);
     expect(isEqual).toBe(true);
   });
+
+  it('should not crash when group.extras exists but group.dev does not', () => {
+    const includeDevDependencies = true;
+    const expectedGraph = depGraphBuilder
+      .addPkgNode({ name: 'six', version: '1.17.0' }, 'six', {
+        labels: { scope: 'prod' },
+      })
+      .connectDep(depGraphBuilder.rootNodeId, 'six')
+      .addPkgNode({ name: 'plotly', version: '5.17.0' }, 'plotly', {
+        labels: { scope: 'dev' },
+      })
+      .connectDep(depGraphBuilder.rootNodeId, 'plotly')
+      .build();
+
+    const isEqual = depGraphForScenarioAt(
+      'fixtures/v2/scenarios/group-extras-no-dev',
+      includeDevDependencies,
+    ).equals(expectedGraph);
+    expect(isEqual).toBe(true);
+  });
 });
 
 function depGraphForScenarioAt(
