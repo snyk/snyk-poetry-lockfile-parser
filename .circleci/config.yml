@@ -7,7 +7,7 @@ executors:
   docker-node:
     parameters:
       version:
-        default: "lts"
+        default: "22"
         type: string
     docker:
       - image: cimg/node:<<parameters.version>>
@@ -45,7 +45,7 @@ jobs:
   security-scans:
     resource_class: small
     docker:
-      - image: cimg/node:lts
+      - image: cimg/node:22
     steps:
       - checkout
       - install
@@ -59,7 +59,7 @@ jobs:
     resource_class: medium
     parameters:
       version:
-        default: "lts"
+        default: "22"
         type: string
     executor:
       name: docker-node
@@ -67,18 +67,7 @@ jobs:
     steps:
       - checkout
       - install
-      # This is a workaround because coverage involves a library that does not support node 8 anymore
-      - when:
-          condition:
-            equal: ["8.17.0", << parameters.version >>]
-          steps:
-            - test
-      - when:
-          condition:
-            not:
-              equal: ["8.17.0", << parameters.version >>]
-          steps:
-            - test-coverage
+      - test-coverage
 
   release:
     resource_class: small
@@ -93,7 +82,7 @@ jobs:
     resource_class: small
     executor:
       name: docker-node
-      version: "current"
+      version: "22"
     steps:
       - checkout
       - install
@@ -135,10 +124,9 @@ workflows:
           matrix:
             parameters:
               version:
-                - 18.20.6
-                - 20.18.3
-                - 22.14.0
-                - 24.18.0
+                - "22"
+                - "24"
+                - "26"
           filters:
             branches:
               ignore:
