@@ -17,7 +17,7 @@ commands:
     steps:
       - run:
           name: Install
-          command: npm install
+          command: npm ci
   test:
     steps:
       - run:
